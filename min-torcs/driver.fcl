@@ -1,0 +1,143 @@
+FUNCTION_BLOCK driver
+
+VAR_INPUT
+  // angles {-90,-75,-60,-45,-30,-20,-15,-10,-5,0,5,10,15,20,30,45,60,75,90}
+  track0: REAL;
+  track1: REAL;
+  track2: REAL;
+  track3: REAL;
+  track4: REAL;
+  track5: REAL;
+  track6: REAL;
+  track7: REAL;
+  track8: REAL;
+  
+  // angle 0
+  track9: REAL;
+  
+  track10: REAL;
+  track11: REAL;
+  track12: REAL;
+  track13: REAL;
+  track14: REAL;
+  track15: REAL;
+  track16: REAL;
+  track17: REAL;
+  track18: REAL;
+  
+  trackPos: REAL;
+  speed: REAL;
+  
+  opponent0: REAL;
+  opponent1: REAL;
+  opponent2: REAL;
+  opponent3: REAL;
+  opponent4: REAL;
+  opponent5: REAL;
+  opponent6: REAL;
+  opponent7: REAL;
+  opponent8: REAL;
+  opponent9: REAL;
+  opponent10: REAL;
+  opponent11: REAL;
+  opponent12: REAL;
+  opponent13: REAL;
+  opponent14: REAL;
+  opponent15: REAL;
+  opponent16: REAL;
+  opponent17: REAL;
+  opponent18: REAL;
+  opponent19: REAL;
+  opponent20: REAL;
+  opponent21: REAL;
+  opponent22: REAL;
+  opponent23: REAL;
+  opponent24: REAL;
+  opponent25: REAL;
+  opponent26: REAL;
+  opponent27: REAL;
+  opponent28: REAL;
+  opponent29: REAL;
+  opponent30: REAL;
+  opponent31: REAL;
+  opponent32: REAL;
+  opponent33: REAL;
+  opponent34: REAL;
+  opponent35: REAL;
+  
+  angle: REAL;
+END_VAR
+
+VAR_OUTPUT
+  steering: REAL;
+  accelerate: REAL;
+  brake: REAL;
+END_VAR
+
+FUZZIFY trackPos
+  TERM left := (0.3, 0) (0.6, 1) (9,1);
+  TERM center := (-0.6, 0) (-0.3, 1) (0.3, 1) (0.6, 0);
+  TERM right := (-9, 1) (-0.6, 1) (-0.3, 0);
+END_FUZZIFY
+
+FUZZIFY angle
+  TERM left := (-3.15, 1) (-0.9, 1) (0, 0);
+  TERM center := (-0.9, 0) (0, 1) (0.9, 0);
+  TERM right := (0, 0) (0.9, 1) (3.15, 1);
+END_FUZZIFY
+
+FUZZIFY track9
+  TERM outside := (-1, 1) (-0.001, 1) (0, 0);
+  TERM near := (-0.001, 0) (0, 1) (30, 1) (60, 0);
+  TERM far := (30, 0) (60, 1) (200, 1);
+END_FUZZIFY
+
+FUZZIFY speed
+  TERM f_slow :=  (0, 1) (15, 1) (30, 0);
+  TERM f_fast :=  (15, 0) (30, 1) (100, 1) (130, 0);
+  TERM f_very_fast :=  (100, 0) (130, 1) (300, 1);
+END_FUZZIFY
+
+DEFUZZIFY steering
+  TERM turn_left :=  (0, 0) (0.1, 1) (1, 1);
+  TERM stay_center :=  (-0.1, 0) (0, 1) (0.1, 0);
+  TERM turn_right :=  (-1, 1) (-0.1, 1) (0, 0);
+  METHOD : COG;
+  DEFAULT := 0.000;
+END_DEFUZZIFY
+
+DEFUZZIFY accelerate
+  TERM nogas :=  (0, 1) (0.3, 1) (0.5, 0);
+  TERM medgas :=  (0.1, 0) (0.2, 1) (0.3, 0);
+  TERM fullgas :=  (0.3, 0) (0.4, 1) (1, 1);
+  METHOD : COG;
+  DEFAULT := 1.000;
+END_DEFUZZIFY
+
+DEFUZZIFY brake
+  TERM nobrake :=  (0, 1) (0.035, 0) ;
+  TERM fullbrake :=  (0.035, 0) (0.1, 1) (1, 1);
+  METHOD : COG;
+  DEFAULT := 0.000;
+END_DEFUZZIFY
+
+RULEBLOCK No1
+  AND : MIN;
+  ACT : MIN;
+  ACCU : MAX;
+  
+  RULE 1 : IF trackPos IS left THEN steering IS turn_right;
+  RULE 2 : IF trackPos IS center THEN steering IS stay_center;
+  RULE 3 : IF trackPos IS right THEN steering IS turn_left;
+  RULE 4 : IF angle IS left THEN steering IS turn_right;
+  RULE 5 : IF angle IS center THEN steering IS stay_center;
+  RULE 6 : IF angle IS right THEN steering IS turn_left;
+  
+  RULE 7 : IF track9 IS near AND speed IS f_fast THEN accelerate IS nogas;
+  RULE 8 : IF track9 IS far AND speed IS f_slow THEN accelerate IS fullgas, brake IS nobrake;
+  RULE 9 : IF track9 IS outside THEN accelerate is medgas, brake IS nobrake;
+  
+  RULE 10 : IF track9 IS near AND speed IS f_very_fast THEN accelerate IS nogas, brake IS fullbrake;
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK

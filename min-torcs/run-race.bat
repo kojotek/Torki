@@ -1,0 +1,18 @@
+@echo off
+if "%1"=="" goto :blank
+if "%2"=="" goto :blank
+cd torcs
+START /B wtorcs.exe -r ../%1 -t 100000 -nofuel -nodamage > ../%1.out
+cd ..
+timeout 1 >nul
+type %1.out
+java -jar TorcsClientFcl.jar %2 >nul
+timeout 1 >nul
+type %1.out 
+goto :done
+
+:blank
+echo Usage: run-race.bat ^<race-config.xml^> ^<fcl-driver.fcl^>
+
+:done
+@echo on
