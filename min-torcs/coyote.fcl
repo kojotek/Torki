@@ -131,24 +131,26 @@ END_FUZZIFY
 FUZZIFY track7
   TERM dist_near := (0, 1) (2, 1) (5, 0);
   TERM dist_medium := (2, 0) (5, 1) (20, 1) (25, 0);
-  TERM dist_far := (20, 0) (25, 1);
+  TERM dist_far := (20, 0) (25, 1) (200, 1);
 END_FUZZIFY
 
 FUZZIFY track11
   TERM dist_near := (0, 1) (2, 1) (5, 0);
   TERM dist_medium := (2, 0) (5, 1) (20, 1) (25, 0);
-  TERM dist_far := (20, 0) (25, 1);
+  TERM dist_far := (20, 0) (25, 1) (200, 1);
 END_FUZZIFY
 
 //==//==//==//==//==//==//==//==//==//==//==//==//==//==//
 
 FUZZIFY track8
-  TERM dist_medium := (0, 1) (30, 0);
+  TERM dist_near := (0, 1) (2, 1) (5, 0);
+  TERM dist_medium := (2, 0) (10, 1) (20, 1) (30, 0);
   TERM dist_far := (20, 0) (30, 1) (200, 1);
 END_FUZZIFY
 
 FUZZIFY track10
-  TERM dist_medium := (0, 1) (30, 0);
+  TERM dist_near := (0, 1) (2, 1) (5, 0);
+  TERM dist_medium := (2, 0) (10, 1) (20, 1) (30, 0);
   TERM dist_far := (20, 0) (30, 1) (200, 1);
 END_FUZZIFY
 
@@ -167,7 +169,7 @@ END_FUZZIFY
 FUZZIFY speed
   TERM speed_slow :=  (0, 1) (90, 1) (120, 0);
   TERM speed_medium :=  (90, 0) (100, 1) (140, 1) (150, 0);
-  TERM speed_fast :=  (140, 0) (150, 1) (300, 1);
+  TERM speed_fast :=  (140, 0) (150, 1) (500, 1);
 END_FUZZIFY
 
 //=============================================================
@@ -224,10 +226,19 @@ RULEBLOCK No1
 	RULE 13 : IF (track11 IS dist_near) THEN steering IS turn_hard_left;
 	RULE 14 : IF (track11 IS dist_medium) THEN steering IS turn_left;
 	
-	RULE 15 : IF (track7 IS dist_near) AND (track11 IS dist_medium) THEN steering IS turn_hard_right;
-	RULE 16 : IF (track11 IS dist_near) AND (track7 IS dist_medium) THEN steering IS turn_hard_left;
 	
-	RULE 17 : IF((track7 IS dist_far) AND (track11 IS dist_far)) THEN steering IS stay_center;
+	////
+	RULE 15 : IF (track8 IS dist_near) THEN steering IS turn_hard_right;
+	RULE 16 : IF (track8 IS dist_medium) THEN steering IS turn_right;
+	
+	RULE 17 : IF (track10 IS dist_near) THEN steering IS turn_hard_left;
+	RULE 18 : IF (track10 IS dist_medium) THEN steering IS turn_left;
+	///
+	
+//	RULE 15 : IF (track7 IS dist_near) AND (track11 IS dist_medium) THEN steering IS turn_hard_right;
+//	RULE 16 : IF (track11 IS dist_near) AND (track7 IS dist_medium) THEN steering IS turn_hard_left;
+	
+	RULE 29 : IF((track7 IS dist_far) AND (track11 IS dist_far)) THEN steering IS stay_center;
 
 END_RULEBLOCK
 

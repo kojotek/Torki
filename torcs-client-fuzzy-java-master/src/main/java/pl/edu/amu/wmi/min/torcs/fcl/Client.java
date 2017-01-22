@@ -54,6 +54,7 @@ public class Client {
     private static String gearsFile;
 
     public static void main(String[] args) {
+
         parseParameters(args);
         SocketHandler mySocket = new SocketHandler(host, port, verbose);
         String inMsg;
@@ -79,7 +80,7 @@ public class Client {
             return;
         }
 
-        Controller driver = new FuzzyDriver(fis);
+        Controller driver = new padDriver();
         driver.setStage(stage);
         driver.setTrackName(trackName);
         
