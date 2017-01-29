@@ -6,7 +6,7 @@ START /B wtorcs.exe -r ../%1 -t 100000 -nofuel -nodamage > ../%1.out
 cd ..
 timeout 1 >nul
 type %1.out
-java -jar TorcsClientFcl.jar %2 >nul
+java -jar TorcsClientFcl.jar %2 gearPreferences:gears.csv >nul
 timeout 1 >nul
 type %1.out 
 goto :done

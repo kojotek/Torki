@@ -34,6 +34,7 @@ public class FuzzyDriver extends Controller {
     /* Gear Changing Constants*/
     private  int[] gearUp = {9000, 8000, 8000, 8000, 8000, 0};
     private  int[] gearDown = {0, 2500, 3000, 3000, 3500, 3500};
+    boolean pulse = true;
     
         public FuzzyDriver(FIS fis) {
         this.fis = fis;
@@ -133,8 +134,21 @@ public class FuzzyDriver extends Controller {
         
         toReturn.steering = steering.getValue();
         toReturn.accelerate = accelerate.getValue();
-        toReturn.brake = brake.getValue();
+        //toReturn.brake = brake.getValue();
+        double brakeRaw = brake.getValue();
         toReturn.gear = getGear(sensors);
+        
+        //add pulstaion
+        if (pulse){
+            toReturn.brake = brakeRaw;
+            pulse = false;
+        }
+        else{
+            toReturn.brake = 0.0f;
+            pulse = true;
+        }
+        
+        
         
         StringBuilder strBuilder = new StringBuilder();
         
@@ -163,7 +177,8 @@ public class FuzzyDriver extends Controller {
         strBuilder.append(", ");
         strBuilder.append(toReturn.accelerate);
         strBuilder.append(", ");
-        strBuilder.append(toReturn.brake);
+        //strBuilder.append(toReturn.brake);
+        strBuilder.append(brakeRaw);
         strBuilder.append(", ");
         strBuilder.append(toReturn.gear);
         strBuilder.append(", ");

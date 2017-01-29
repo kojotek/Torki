@@ -80,7 +80,7 @@ public class Client {
             return;
         }
 
-        Controller driver = new padDriver();
+        Controller driver = new FuzzyDriver(fis);
         driver.setStage(stage);
         driver.setTrackName(trackName);
         

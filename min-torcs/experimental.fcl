@@ -1,0 +1,246 @@
+FUNCTION_BLOCK driver
+
+VAR_INPUT
+  // angles {-90,-75,-60,-45,-30,-20,-15,-10,-5,0,5,10,15,20,30,45,60,75,90}
+  track0: REAL;
+  track1: REAL;
+  track2: REAL;
+  track3: REAL;
+  track4: REAL;
+  track5: REAL;
+  track6: REAL;
+  track7: REAL;
+  track8: REAL;
+ 
+  //0 stopni
+  track9: REAL;
+  
+  track10: REAL;
+  track11: REAL;
+  track12: REAL;
+  track13: REAL;
+  track14: REAL;
+  track15: REAL;
+  track16: REAL;
+  track17: REAL;
+  track18: REAL;
+  
+  trackPos: REAL;
+  curvePrediction: REAL;
+  speed: REAL;
+  
+  opponent0: REAL;
+  opponent1: REAL;
+  opponent2: REAL;
+  opponent3: REAL;
+  opponent4: REAL;
+  opponent5: REAL;
+  opponent6: REAL;
+  opponent7: REAL;
+  opponent8: REAL;
+  opponent9: REAL;
+  opponent10: REAL;
+  opponent11: REAL;
+  opponent12: REAL;
+  opponent13: REAL;
+  opponent14: REAL;
+  opponent15: REAL;
+  opponent16: REAL;
+  opponent17: REAL;
+  opponent18: REAL;
+  opponent19: REAL;
+  opponent20: REAL;
+  opponent21: REAL;
+  opponent22: REAL;
+  opponent23: REAL;
+  opponent24: REAL;
+  opponent25: REAL;
+  opponent26: REAL;
+  opponent27: REAL;
+  opponent28: REAL;
+  opponent29: REAL;
+  opponent30: REAL;
+  opponent31: REAL;
+  opponent32: REAL;
+  opponent33: REAL;
+  opponent34: REAL;
+  opponent35: REAL;
+  
+  angle: REAL;
+  distanceRaced: REAL;
+  
+END_VAR
+
+VAR_OUTPUT
+  steering: REAL;
+  accelerate: REAL;
+  brake: REAL;
+END_VAR
+
+FUZZIFY distanceRaced
+  TERM start := (0.0, 1) (200, 1) (250,0);
+  TERM not_start := (200, 0) (250, 1);
+END_FUZZIFY
+
+FUZZIFY trackPos
+  TERM left := (0.3, 0) (0.6, 1) (9,1);
+  TERM center := (-0.6, 0) (-0.3, 1) (0.3, 1) (0.6, 0);
+  TERM right := (-9, 1) (-0.6, 1) (-0.3, 0);
+END_FUZZIFY
+
+FUZZIFY curvePrediction
+  TERM right := (0.1, 0) (0.5, 1) (400,1);
+  TERM center := (-0.5, 0) (-0.3, 1) (0.3, 1) (0.5, 0);
+  TERM left := (-400, 1) (-0.5, 1) (-0.1, 0);
+END_FUZZIFY
+
+FUZZIFY angle
+  TERM drift_left := (-75, 1) (-5, 1) (-3, 0);
+  TERM left := (-3.15, 1) (-0.9, 1) (0, 0);
+  TERM center := (-0.9, 0) (0, 1) (0.9, 0);
+  TERM right := (0, 0) (0.9, 1) (3.15, 1);
+  TERM drift_right := (3, 0) (5, 1) (75, 0);
+END_FUZZIFY
+
+//==//==//==//==//==//==//==//==//==//==//==//==//==//==//
+
+FUZZIFY track2
+  TERM dist_medium := (0, 1) (10, 0);
+  TERM dist_far := (5, 0) (10, 1) (200, 1);
+END_FUZZIFY
+
+FUZZIFY track16
+  TERM dist_medium := (0, 1) (10, 0);
+  TERM dist_far := (5, 0) (10, 1) (200, 1);
+END_FUZZIFY
+
+//==//==//==//==//==//==//==//==//==//==//==//==//==//==//
+
+FUZZIFY track6
+  TERM dist_medium := (0, 1) (20, 0);
+  TERM dist_far := (10, 0) (20, 1) (200, 1);
+END_FUZZIFY
+
+FUZZIFY track12
+  TERM dist_medium := (0, 1) (20, 0);
+  TERM dist_far := (10, 0) (20, 1) (200, 1);
+END_FUZZIFY
+
+//==//==//==//==//==//==//==//==//==//==//==//==//==//==//
+
+FUZZIFY track7
+  TERM dist_near := (0, 1) (2, 1) (5, 0);
+  TERM dist_medium := (2, 0) (5, 1) (20, 1) (25, 0);
+  TERM dist_far := (20, 0) (25, 1) (200, 1);
+END_FUZZIFY
+
+FUZZIFY track11
+  TERM dist_near := (0, 1) (2, 1) (5, 0);
+  TERM dist_medium := (2, 0) (5, 1) (20, 1) (25, 0);
+  TERM dist_far := (20, 0) (25, 1) (200, 1);
+END_FUZZIFY
+
+//==//==//==//==//==//==//==//==//==//==//==//==//==//==//
+
+FUZZIFY track8
+  TERM dist_near := (0, 1) (2, 1) (5, 0);
+  TERM dist_medium := (2, 0) (10, 1) (20, 1) (30, 0);
+  TERM dist_far := (20, 0) (30, 1) (200, 1);
+END_FUZZIFY
+
+FUZZIFY track10
+  TERM dist_near := (0, 1) (2, 1) (5, 0);
+  TERM dist_medium := (2, 0) (10, 1) (20, 1) (30, 0);
+  TERM dist_far := (20, 0) (30, 1) (200, 1);
+END_FUZZIFY
+
+//==//==//==//==//==//==//==//==//==//==//==//==//==//==//
+
+FUZZIFY track9
+  TERM dist_near := (0, 1) (20, 1) (35, 0);
+  TERM dist_medium := (20, 1) (35, 1) (55, 0);
+  TERM dist_far := (35, 0) (55, 1) (199, 1) (200, 0);
+  TERM dist_very_far := (199, 0) (200, 1);
+END_FUZZIFY
+
+//==//==//==//==//==//==//==//==//==//==//==//==//==//==//
+
+
+FUZZIFY speed
+  TERM speed_slow :=  (0, 1) (90, 1) (120, 0);
+  TERM speed_medium :=  (90, 0) (100, 1) (140, 1) (150, 0);
+  TERM speed_fast :=  (140, 0) (150, 1) (500, 1);
+END_FUZZIFY
+
+//=============================================================
+
+DEFUZZIFY steering
+	TERM turn_hard_right := (-1.3, 1) (-0.8, 0);
+	TERM turn_right := (-0.8, 1) (-0.1, 0);
+	//TERM stay_center := gauss 0 0.5;
+	TERM stay_center := (-0.2, 0) (0.0, 1) (0.2, 0);
+	TERM turn_left := (0.1, 0) (0.8, 1);
+	TERM turn_hard_left := (0.8, 0) (1.3, 1);
+  METHOD : COG;
+  DEFAULT := 77.777;
+END_DEFUZZIFY
+
+DEFUZZIFY accelerate
+  TERM nogas :=  (0, 1) (0.3, 1) (0.5, 0);
+  TERM medgas :=  (0.3, 0) (0.5, 1) (0.7, 1) (0.9, 0);
+  TERM fullgas :=  (0.7, 0) (1.3, 1);
+  METHOD : COG;
+  DEFAULT := 0.000;
+END_DEFUZZIFY
+
+DEFUZZIFY brake
+  TERM nobrake :=  (-0.1, 1) (0.035, 0) ;
+  TERM fullbrake := (0.035, 0) (1.1, 1);
+  METHOD : COG;
+  DEFAULT := 0.000;
+END_DEFUZZIFY
+
+RULEBLOCK No1
+  AND : MIN;
+  ACT : MIN;  
+  ACCU : MAX;
+
+	RULE 1 : IF (track9 IS NOT dist_near ) THEN accelerate IS fullgas, brake IS nobrake;
+  
+//	RULE 2 : IF (speed IS speed_slow) AND (track9 IS dist_near) THEN accelerate IS medgas, brake IS nobrake;
+//	RULE 3 : IF (speed IS speed_medium) AND (track9 IS dist_near) THEN accelerate IS nogas, brake IS fullbrake;
+//	RULE 4 : IF (speed IS speed_fast) AND (track9 IS dist_near) THEN accelerate IS nogas, brake IS fullbrake;
+
+//	RULE 5 : IF (speed IS speed_slow) AND (track9 IS dist_medium) THEN accelerate IS fullgas, brake IS nobrake;
+//	RULE 6 : IF (speed IS speed_medium) AND (track9 IS dist_medium) THEN accelerate IS medgas, brake IS nobrake;
+//	RULE 7 : IF (speed IS speed_fast) AND (track9 IS dist_medium) THEN accelerate IS nogas, brake IS fullbrake;
+
+//	RULE 8 : IF (speed IS speed_slow) AND (track9 IS dist_far) THEN accelerate IS fullgas, brake IS nobrake;
+//	RULE 9 : IF (speed IS speed_medium) AND (track9 IS dist_far) THEN accelerate IS fullgas, brake IS nobrake;
+//	RULE 10 : IF (speed IS speed_fast) AND (track9 IS dist_far) THEN accelerate IS medgas, brake IS nobrake;
+	
+	
+	
+	RULE 11 : IF (track7 IS dist_near) THEN steering IS turn_hard_right;
+	RULE 12 : IF (track7 IS dist_medium) THEN steering IS turn_right;
+	
+	RULE 13 : IF (track11 IS dist_near) THEN steering IS turn_hard_left;
+	RULE 14 : IF (track11 IS dist_medium) THEN steering IS turn_left;
+	
+	
+	////
+//	RULE 15 : IF (track8 IS dist_near) THEN steering IS turn_hard_right;
+//	RULE 16 : IF (track8 IS dist_medium) THEN steering IS turn_right;
+	
+//	RULE 17 : IF (track10 IS dist_near) THEN steering IS turn_hard_left;
+//	RULE 18 : IF (track10 IS dist_medium) THEN steering IS turn_left;
+	///
+	
+//	RULE 15 : IF (track7 IS dist_near) AND (track11 IS dist_medium) THEN steering IS turn_hard_right;
+//	RULE 16 : IF (track11 IS dist_near) AND (track7 IS dist_medium) THEN steering IS turn_hard_left;
+	
+	RULE 29 : IF((track7 IS dist_far) AND (track11 IS dist_far)) THEN steering IS stay_center;
+
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
