@@ -1,1 +1,1 @@
-java -jar optimization.jar experimental.fcl output_pad.csv 10 -params steering track11 -error steering
+java -jar optimization.jar coyote2.fcl archive/output.csv 5 -params steering -error steering

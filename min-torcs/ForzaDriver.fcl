@@ -1,0 +1,329 @@
+FUNCTION_BLOCK driver
+
+VAR_INPUT	// angles {-90,-75,-60,-45,-30,-20,-15,-10,-5,0,5,10,15,20,30,45,60,75,90}
+  track0: REAL;
+  track1: REAL;
+  track2: REAL;
+  track3: REAL;
+  track4: REAL;
+  track5: REAL;
+  track6: REAL;
+  track7: REAL;
+  track8: REAL;
+  track9: REAL;	//angle 0
+  track10: REAL;
+  track11: REAL;
+  track12: REAL;
+  track13: REAL;
+  track14: REAL;
+  track15: REAL;
+  track16: REAL;
+  track17: REAL;
+  track18: REAL;
+  opponent0: REAL;
+  opponent1: REAL;
+  opponent2: REAL;
+  opponent3: REAL;
+  opponent4: REAL;
+  opponent5: REAL;
+  opponent6: REAL;
+  opponent7: REAL;
+  opponent8: REAL;
+  opponent9: REAL;
+  opponent10: REAL;
+  opponent11: REAL;
+  opponent12: REAL;
+  opponent13: REAL;
+  opponent14: REAL;
+  opponent15: REAL;
+  opponent16: REAL;
+  opponent17: REAL;
+  opponent18: REAL;
+  opponent19: REAL;
+  opponent20: REAL;
+  opponent21: REAL;
+  opponent22: REAL;
+  opponent23: REAL;
+  opponent24: REAL;
+  opponent25: REAL;
+  opponent26: REAL;
+  opponent27: REAL;
+  opponent28: REAL;
+  opponent29: REAL;
+  opponent30: REAL;
+  opponent31: REAL;
+  opponent32: REAL;
+  opponent33: REAL;
+  opponent34: REAL;
+  opponent35: REAL;
+  
+  trackPos: REAL;
+  speed: REAL;
+  angle: REAL;
+  
+END_VAR
+
+VAR_OUTPUT
+
+  steering: REAL;
+  accelerate: REAL;
+  brake: REAL;
+  
+END_VAR
+//Opponent 18
+	FUZZIFY opponent18
+		TERM close := (4.5, 1) (6, 1) (8, 0);
+	END_FUZZIFY
+//
+//Opponent 19
+	FUZZIFY opponent19
+		TERM close := (2, 1) (9, 1) (12, 0);
+	END_FUZZIFY
+//
+//Opponent 20
+	FUZZIFY opponent20
+		TERM close := (2, 1) (13, 1) (17, 0);
+	END_FUZZIFY
+//
+//Opponent 21
+	FUZZIFY opponent21
+		TERM close := (2, 1) (13, 1) (17, 0);
+	END_FUZZIFY
+//
+//Opponent 22
+	FUZZIFY opponent22
+		TERM close := (2, 1) (13, 1) (17, 0);
+	END_FUZZIFY
+//
+//Opponent 23
+	FUZZIFY opponent23
+		TERM close := (2, 1) (13, 1) (17, 0);
+	END_FUZZIFY
+//
+//Opponent 24
+	FUZZIFY opponent24
+		TERM close := (2, 1) (13, 1) (17, 0);
+	END_FUZZIFY
+//
+//Stopni 0
+
+	FUZZIFY track9
+	  TERM brake100 := (80, 1) (83, 0) (200, 0);
+	  TERM beforebrake := (99, 0)(100, 1) (200, 1);
+	  TERM close := (0, 1) (10, 1) (15, 0);
+	  TERM far := (50, 0) (100, 1) (200, 1);
+	END_FUZZIFY
+//
+
+//Stopni 5
+
+	FUZZIFY track8
+		TERM far := (50, 0) (100, 1) (200, 1);
+		TERM brake100 := (90, 1) (91, 0) (200, 0);
+	END_FUZZIFY
+	
+	FUZZIFY track10
+		TERM far := (50, 0) (100, 1) (200, 1);
+		TERM brake100 := (99, 1) (100, 0) (200, 0);
+		TERM around30 := (20, 0) (25, 1) (35, 1) (40, 0);
+	END_FUZZIFY
+
+//
+	
+//Stopni 10
+
+	FUZZIFY track7
+		TERM far := (50, 0) (100, 1) (200, 1);
+		TERM brake100 := (90, 1) (91, 0) (200, 0);
+	END_FUZZIFY
+
+	FUZZIFY track11
+		TERM far := (50, 0) (100, 1) (200, 1);
+		TERM brake100 := (90, 1) (91, 0) (200, 0);
+		TERM around30 := (20, 0) (25, 1) (35, 1) (40, 0);
+	END_FUZZIFY
+//
+
+//Stopni 15
+
+	FUZZIFY track6
+		TERM far := (50, 0) (100, 1) (200, 1);
+		TERM brake100 := (90, 1) (91, 0) (200, 0);
+	END_FUZZIFY
+	FUZZIFY track12
+		TERM far := (50, 0) (100, 1) (200, 1);
+		TERM brake100 := (90, 1) (91, 0) (200, 0);
+	END_FUZZIFY
+
+//
+
+//Stopni 20
+
+	FUZZIFY track5 
+		TERM far := (30, 0) (50, 1) (200, 1);
+		TERM brake100 := (90, 1) (91, 0) (200, 0);
+	END_FUZZIFY
+
+	FUZZIFY track13
+		TERM far := (30, 0) (50, 1) (200, 1);
+		TERM brake100 := (90, 1) (91, 0) (200, 0);
+	END_FUZZIFY
+//
+
+//Stopni 30
+	
+	FUZZIFY track4
+		TERM far := (20, 0) (30, 1) (200, 1);
+		TERM brake100 := (40, 1) (41, 0) (200, 0);
+	END_FUZZIFY
+	
+	FUZZIFY track14
+		TERM far := (20, 0) (30, 1) (200, 1);
+		TERM brake100 := (40, 1) (41, 0) (200, 0);
+	END_FUZZIFY
+//
+	
+//Stopni 45
+
+	FUZZIFY track3
+		TERM far := (20, 0) (30, 1) (200, 1);
+		TERM close := (3, 0) (4, 1) (10, 1) (11, 0);
+		TERM veryclose := (0, 1) (3, 1) (4, 0);
+		TERM brake100 := (90, 1) (91, 0) (200, 0);
+	END_FUZZIFY
+
+	FUZZIFY track15
+		TERM far := (20, 0) (30, 1) (200, 1);
+		TERM veryclose := (0, 1) (3, 1) (4, 0);
+		TERM brake100 := (90, 1) (91, 0) (200, 0);
+	END_FUZZIFY
+//
+
+//Stopni 60
+
+	FUZZIFY track2
+		TERM far := (50, 0) (100, 1) (200, 1);
+	END_FUZZIFY
+
+	FUZZIFY track16
+		TERM far := (50, 0) (100, 1) (200, 1);
+	END_FUZZIFY
+//
+
+//Stopni 90
+
+FUZZIFY track0
+	TERM close := (0,1)(1,1)(2,0);
+	TERM enoughspace := (2, 0) (3, 1) (9, 1) (10, 0);
+END_FUZZIFY
+
+FUZZIFY track18
+	TERM close := (0,0)(1.5,1)(3,0);
+END_FUZZIFY
+
+//
+
+FUZZIFY trackPos
+	TERM leftout := (0.9, 0) (1, 1) (5, 1);
+	TERM left := (0.3, 0) (0.6, 1) (0.9, 1) (1, 0);
+	TERM center := (-0.6, 0) (-0.3, 1) (0.3, 1) (0.8, 0);
+	TERM right := (-1, 1) (-0.6, 1) (-0.3, 0);
+END_FUZZIFY
+
+FUZZIFY angle
+	TERM leftout := (-1.5, 1) (-0.2, 1) (0.4, 0);
+	TERM left := (-3.15, 1) (-0.3, 1) (-0.1, 0);
+	TERM center := (-0.3, 0) (0, 1) (0.3, 0);
+	TERM right := (0.1, 0) (0.3, 1) (3.15, 1);
+	TERM rightout := (0.3, 0) (1.5, 1) (3.14, 1);
+END_FUZZIFY
+
+FUZZIFY speed
+  TERM morethan150 := (130, 0) (160, 1) (300, 1);
+  TERM around140 := (120, 0) (125, 1) (149, 1) (151, 0);
+  TERM around130 := (110, 0) (130, 1) (150, 0);
+END_FUZZIFY
+
+DEFUZZIFY steering
+	TERM leftuniversal := (0, 0) (0.6, 0.5) (1, 1);
+  TERM left3 := (0.8, 0) (1, 1);
+  TERM left2 :=  (0.7, 0) (0.8, 1) (0.9, 0);
+  TERM left1 := (0.05,0)(0.1,1)(0.2,0);
+  TERM center :=  (-0.3, 0) (0, 1) (0.3, 0);
+  TERM right0 := (-0.1,0)(-0.05,1)(0,0);
+  TERM right1 := (-0.2,0)(-0.1,1)(-0.05,0);
+  TERM right2 :=  (-0.9, 0) (-0.8, 1) (-0.7, 0);
+  TERM right3 := (-1, 1) (-0.8, 0);
+  TERM rightuniversal := (-1, 1) (-0.6, 0.5) (0, 0);
+  TERM soft := (-0.4, 0) (0, 1) (0.4, 0);
+  METHOD : COG;
+  DEFAULT := 0.000;
+END_DEFUZZIFY
+
+DEFUZZIFY accelerate
+  TERM nogas :=  (0, 1) (0.3, 1) (0.5, 0);
+  TERM medgas :=  (0.3, 0) (0.4, 1) (0.8, 0);
+  TERM fullgas :=  (0.99, 1) (1, 1);
+  METHOD : COG;
+  DEFAULT := 1.000;
+END_DEFUZZIFY
+
+DEFUZZIFY brake
+  TERM nobrake :=  (0, 1) (0.001, 0) (1, 0);
+  TERM soft := (0, 1) (0.2, 1) (0.4, 0);
+  TERM almostfull := (0.49, 0) (0.5, 1) (0.51, 0);
+  TERM hard := (0.8, 0) (0.9, 1) (1, 1);
+  TERM full :=  (0.9, 0) (0.99, 1) (1, 1);
+  METHOD : COG;
+  DEFAULT := 0.000;
+END_DEFUZZIFY
+
+RULEBLOCK No1
+  AND : MIN;
+  ACT : MIN;
+  ACCU : MAX;
+
+//braking and throttle
+  RULE 1 : IF track9 IS brake100 AND (track8 IS brake100 AND track10 IS brake100) AND (track7 IS brake100 AND track11 IS brake100) AND (track6 IS brake100 AND track12 IS brake100) AND (track5 IS brake100 AND track13 IS brake100) AND (track4 IS brake100 AND track14 IS brake100) AND (track3 IS brake100 AND track15 IS brake100) AND speed IS morethan150 AND steering IS center AND trackPos IS center THEN brake IS full, accelerate IS nogas;
+  RULE 2 : IF steering IS right3 THEN brake IS nobrake, accelerate IS nogas;
+  RULE 3 : IF track3 IS veryclose AND speed IS around130 AND track9 IS close THEN accelerate IS nogas, brake IS soft;
+  
+  
+//left turn
+  RULE 10 : IF track8 IS far THEN steering IS left1;
+  RULE 11 : IF track7 IS far THEN steering IS left1;
+  RULE 12 : IF track6 IS far THEN steering IS left2;
+  RULE 13 : IF track5 IS far THEN steering IS left3;
+  RULE 14 : IF track4 IS far THEN steering IS left3;
+  RULE 15 : IF track3 IS far THEN steering IS left3;
+  
+//right turn
+  RULE 20 : IF track10 IS far THEN steering IS right1;
+  RULE 21 : IF track11 IS far THEN steering IS right1;
+  RULE 22 : IF track12 IS far THEN steering IS right2;
+  RULE 23 : IF track13 IS far THEN steering IS right3;
+  RULE 24 : IF track14 IS far THEN steering IS right3;
+  RULE 25 : IF track15 IS far THEN steering IS right3;
+  
+  RULE 26 : IF (track11 IS around30) OR (track10 IS around30) AND track18 IS close AND track9 IS NOT far THEN steering IS right3;
+
+  RULE 27 : IF trackPos IS leftout AND angle IS leftout THEN steering IS right3, accelerate IS medgas;
+  RULE 28 : IF trackPos IS leftout AND angle IS rightout THEN steering IS left3, accelerate IS medgas;
+  
+  RULE 29 : IF speed IS morethan150 AND track9 IS beforebrake AND trackPos IS center THEN steering IS left1;
+ 
+  
+//angle steering
+  RULE 30 : IF angle IS left AND trackPos IS left THEN steering IS rightuniversal;
+  RULE 31 : IF angle IS right AND trackPos IS right THEN steering IS leftuniversal;
+  //RULE 31 : IF angle IS right THEN steering IS left3;
+  //RULE 32 : IF angle IS center THEN steering IS center;
+
+//overtaking
+  RULE 40 : IF ((opponent18 IS close) OR (opponent19 IS close)) AND track0 IS enoughspace THEN steering IS left2;
+  RULE 41 : IF ((opponent20 IS close) OR (opponent21 IS close)OR (opponent22 IS close)OR (opponent23 IS close)OR (opponent24 IS close)) AND track0 IS enoughspace THEN steering IS left1;
+
+  
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK

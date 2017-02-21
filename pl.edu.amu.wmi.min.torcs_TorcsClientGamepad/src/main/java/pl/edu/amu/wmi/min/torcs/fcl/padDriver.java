@@ -146,8 +146,11 @@ public class padDriver extends Controller {
         //    fis.setVariable("track" + i, trackEdge[i]);
         //}
 
-        double curvePrediction = angles[10] - angles[8];
-        //fis.setVariable("curvePrediction", curvePrediction);
+        double[] curvePredictions = new double[trackEdge.length/2];
+        for (int i = 10; i < trackEdge.length; i++) {
+            double curvePrediction = Math.log10(trackEdge[i]/trackEdge[18-i]);
+            curvePredictions[i-10] = curvePrediction;
+        }
 
         // Track pos (−∞,+∞)
         // Distance between the car and the track axis. The value is
@@ -205,44 +208,47 @@ public class padDriver extends Controller {
         //toReturn.steering = steering.getValue();
         //toReturn.accelerate = accelerate.getValue();
         //toReturn.brake = brake.getValue();
-        
-        
+
+
         toReturn.gear = getGear(sensors);
-        
-        
+
+
 
         StringBuilder strBuilder = new StringBuilder();
         
         for (int i = 0; i < angles.length; i++) {
             strBuilder.append(trackEdge[i]);
-            strBuilder.append(", ");
+            strBuilder.append(",");
+        }
+        
+        for (int i = 0; i < curvePredictions.length; i++) {
+            strBuilder.append(curvePredictions[i]);
+            strBuilder.append(",");
         }
         
         strBuilder.append(trackPosition);
-        strBuilder.append(", ");
-        strBuilder.append(curvePrediction);
-        strBuilder.append(", ");
+        strBuilder.append(",");
         strBuilder.append(speed);
-        strBuilder.append(", ");
+        strBuilder.append(",");
         strBuilder.append(distanceRaced);
-        strBuilder.append(", ");
+        strBuilder.append(",");
        
         for (int i = 0; i < opponents.length; i++) {
             strBuilder.append(opponents[i]);
-            strBuilder.append(", ");
+            strBuilder.append(",");
         }
        
         strBuilder.append(angle);
-        strBuilder.append(", ");
+        strBuilder.append(",");
         strBuilder.append(toReturn.steering);
-        strBuilder.append(", ");
+        strBuilder.append(",");
         strBuilder.append(toReturn.accelerate);
-        strBuilder.append(", ");
+        strBuilder.append(",");
         //strBuilder.append(toReturn.brake);
         strBuilder.append(brakeRaw);
-        strBuilder.append(", ");
+        strBuilder.append(",");
         strBuilder.append(toReturn.gear);
-        strBuilder.append(", ");
+        strBuilder.append(",");
 
         System.out.println(strBuilder.toString());
         
@@ -251,7 +257,7 @@ public class padDriver extends Controller {
     
     @Override
     public void reset() {
-        //System.out.println("Restarting the race!");
+        System.out.println("Restarting the race!");
         
     }
     

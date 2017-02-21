@@ -45,12 +45,17 @@ public class TorcsErrorFunction extends ErrorFunction{
         samples.put("steering", new double[entriesCount]);
         samples.put("accelerate", new double[entriesCount]);
         samples.put("brake", new double[entriesCount]);
-
+        samples.put("curvePred0", new double[entriesCount]);
+        samples.put("curvePred1", new double[entriesCount]);
+        samples.put("curvePred2", new double[entriesCount]);
+        samples.put("curvePred3", new double[entriesCount]);
+        samples.put("curvePred4", new double[entriesCount]);
+        
 
         for (int i = 0; i < entriesCount; i++){
             String[] entry = entries.get(i);
-            samples.get("trackPos")[i]  = Double.parseDouble(entry[19]);
-            samples.get("angle")[i]     = Double.parseDouble(entry[33]);
+            samples.get("trackPos")[i]  = Double.parseDouble(entry[28]);
+            samples.get("angle")[i]     = Double.parseDouble(entry[67]);
             samples.get("track6")[i]    = Double.parseDouble(entry[6]);
             samples.get("track12")[i]   = Double.parseDouble(entry[12]);
             samples.get("track7")[i]    = Double.parseDouble(entry[7]);
@@ -58,10 +63,15 @@ public class TorcsErrorFunction extends ErrorFunction{
             samples.get("track8")[i]    = Double.parseDouble(entry[8]);
             samples.get("track10")[i]   = Double.parseDouble(entry[10]);
             samples.get("track9")[i]    = Double.parseDouble(entry[9]);
-            samples.get("speed")[i]     = Double.parseDouble(entry[21]);
-            samples.get("steering")[i]  = Double.parseDouble(entry[34]);
-            samples.get("accelerate")[i] = Double.parseDouble(entry[35]);
-            samples.get("brake")[i]     = Double.parseDouble(entry[36]);
+            samples.get("speed")[i]     = Double.parseDouble(entry[29]);
+            samples.get("steering")[i]  = Double.parseDouble(entry[68]);
+            samples.get("accelerate")[i] = Double.parseDouble(entry[69]);
+            samples.get("brake")[i]     = Double.parseDouble(entry[70]);
+            samples.get("curvePred0")[i]     = Double.parseDouble(entry[19]);
+            samples.get("curvePred1")[i]     = Double.parseDouble(entry[20]);
+            samples.get("curvePred2")[i]     = Double.parseDouble(entry[21]);
+            samples.get("curvePred3")[i]     = Double.parseDouble(entry[22]);
+            samples.get("curvePred4")[i]     = Double.parseDouble(entry[23]);
         }
     }
 
@@ -82,6 +92,12 @@ public class TorcsErrorFunction extends ErrorFunction{
         Variable varTrack10 = fb.getVariable("track10");
         Variable varTrack9 = fb.getVariable("track9");
         Variable varSpeed = fb.getVariable("speed");
+        
+        Variable varCurve0 = fb.getVariable("curvePred0");
+        Variable varCurve1 = fb.getVariable("curvePred1");
+        Variable varCurve2 = fb.getVariable("curvePred2");
+        Variable varCurve3 = fb.getVariable("curvePred3");
+        Variable varCurve4 = fb.getVariable("curvePred4");
 
         for (int i=0; i<params.size(); i++){
             outVariables.add(fb.getVariable(params.get(i)));
@@ -103,7 +119,13 @@ public class TorcsErrorFunction extends ErrorFunction{
             varTrack10.setValue(samples.get("track10")[sample]);
             varTrack9.setValue(samples.get("track9")[sample]); 
             varSpeed.setValue(samples.get("speed")[sample]); 
-
+            
+            varCurve0.setValue(samples.get("curvePred0")[sample]); 
+            varCurve1.setValue(samples.get("curvePred1")[sample]); 
+            varCurve2.setValue(samples.get("curvePred2")[sample]); 
+            varCurve3.setValue(samples.get("curvePred3")[sample]); 
+            varCurve4.setValue(samples.get("curvePred4")[sample]); 
+            
             // Evaluate FIS 
             fb.evaluate(); 
 

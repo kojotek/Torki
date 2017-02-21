@@ -20,6 +20,7 @@
 package pl.edu.amu.wmi.min.torcs.fcl;
 
 import java.io.IOException;
+import java.util.Scanner;
 import net.sourceforge.cig.torcs.MessageBasedSensorModel;
 import net.sourceforge.cig.torcs.Controller;
 import net.sourceforge.cig.torcs.Action;
@@ -54,7 +55,7 @@ public class Client {
     private static String gearsFile;
 
     public static void main(String[] args) {
-
+        
         parseParameters(args);
         SocketHandler mySocket = new SocketHandler(host, port, verbose);
         String inMsg;
@@ -135,11 +136,13 @@ public class Client {
                     /*
 		     * Check if race is restarted
                      */
+                    System.out.println(inMsg);
+                    
                     if (inMsg.indexOf("***restart***") >= 0) {
                         driver.reset();
-                        if (verbose) {
-                            //System.out.println("Server restarting!");
-                        }
+                        //if (verbose) {
+                            System.out.println("Server restarting!");
+                        //}
                         break;
                     }
 

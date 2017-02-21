@@ -132,7 +132,7 @@ public class Optimization {
         optimizationDeltaJump.optimize(); 
 
 
-        Gpr.toFile("fcl_optimized/fcl_optimized.fcl", functionBlock.toString()); 
+        Gpr.toFile("fcl_optimized_2/fcl_optimized_2.fcl", functionBlock.toString()); 
 
         functionBlock.reset();
         System.out.println("Optimization finished"); 
