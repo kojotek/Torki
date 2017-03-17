@@ -1,0 +1,351 @@
+FUNCTION_BLOCK driver
+
+VAR_INPUT
+
+	// angles {-90.-75.-60.-45.-30.-20.-15.-10.-5.0.5.10.15.20.30.45.60.75.90}
+	track0: REAL;
+	track1: REAL;
+	track2: REAL;
+	track3: REAL;
+	track4: REAL;
+	track5: REAL;
+	track6: REAL;
+	track7: REAL;
+	track8: REAL;
+	track9: REAL;
+	track10: REAL;
+	track11: REAL;
+	track12: REAL;
+	track13: REAL;
+	track14: REAL;
+	track15: REAL;
+	track16: REAL;
+	track17: REAL;
+	track18: REAL;
+
+	trackPos: REAL;
+
+	curvePred0: REAL;
+	curvePred1: REAL;
+	curvePred2: REAL;
+	curvePred3: REAL;
+	curvePred4: REAL;
+	curvePred5: REAL;
+	curvePred6: REAL;
+	curvePred7: REAL;
+	curvePred8: REAL;
+	curvePred9: REAL;
+
+	speed: REAL;
+
+	opponent0: REAL;
+	opponent1: REAL;
+	opponent2: REAL;
+	opponent3: REAL;
+	opponent4: REAL;
+	opponent5: REAL;
+	opponent6: REAL;
+	opponent7: REAL;
+	opponent8: REAL;
+	opponent9: REAL;
+	opponent10: REAL;
+	opponent11: REAL;
+	opponent12: REAL;
+	opponent13: REAL;
+	opponent14: REAL;
+	opponent15: REAL;
+	opponent16: REAL;
+	opponent17: REAL;
+	opponent18: REAL;
+	opponent19: REAL;
+	opponent20: REAL;
+	opponent21: REAL;
+	opponent22: REAL;
+	opponent23: REAL;
+	opponent24: REAL;
+	opponent25: REAL;
+	opponent26: REAL;
+	opponent27: REAL;
+	opponent28: REAL;
+	opponent29: REAL;
+	opponent30: REAL;
+	opponent31: REAL;
+	opponent32: REAL;
+	opponent33: REAL;
+	opponent34: REAL;
+	opponent35: REAL;
+
+	angle: REAL;
+
+	distanceRaced: REAL;
+
+END_VAR
+
+
+
+VAR_OUTPUT
+	steering: REAL;
+	accelerate: REAL;
+	brake: REAL;
+END_VAR
+
+
+
+FUZZIFY track9
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+
+
+TERM dist_near := (0, 1) (30, 1) (45, 0);
+TERM dist_medium := (30, 1) (45, 1) (55, 0);
+TERM dist_far := (45, 0) (55, 1) (199, 1) (200, 0);
+TERM dist_very_far := (199, 0) (200, 1);
+END_FUZZIFY
+
+
+FUZZIFY track0
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+
+FUZZIFY track1
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+FUZZIFY track2
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+FUZZIFY track3
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+FUZZIFY track4
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+FUZZIFY track5
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+
+FUZZIFY track6
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+FUZZIFY track7
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+FUZZIFY track8
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+FUZZIFY track10
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+FUZZIFY track11
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+FUZZIFY track12
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+FUZZIFY track13
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+FUZZIFY track14
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+FUZZIFY track15
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+FUZZIFY track16
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+FUZZIFY track17
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+FUZZIFY track18
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+
+FUZZIFY trackPos
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+FUZZIFY speed
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+
+	TERM speed_slow :=	(0, 1) (90, 1) (120, 0);
+	TERM speed_medium :=	(90, 0) (100, 1) (140, 1) (150, 0);
+	TERM speed_fast :=	(140, 0) (150, 1) (500, 1);
+
+END_FUZZIFY
+
+FUZZIFY angle
+TERM very_small := gauss 0 0.295803989154981;
+TERM small := gauss 0.25 0.295803989154981;
+TERM medium := gauss 0.5 0.295803989154981;
+TERM large := gauss 0.75 0.295803989154981;
+TERM very_large := gauss 1 0.295803989154981;
+END_FUZZIFY
+
+
+
+DEFUZZIFY steering
+	TERM very_small := gauss 0 0.295803989154981;
+	TERM small := gauss 0.25 0.295803989154981;
+	TERM medium := gauss 0.5 0.295803989154981;
+	TERM large := gauss 0.75 0.295803989154981;
+	TERM very_large := gauss 1 0.295803989154981;
+	METHOD : COG;
+	DEFAULT := 77.777;
+END_DEFUZZIFY
+
+DEFUZZIFY accelerate
+	TERM nogas :=	(0.0, 1) (0.3, 1) (0.5, 0);
+	TERM medgas :=	(0.3, 0) (0.5, 1) (0.7, 1) (0.9, 0);
+	TERM fullgas :=	(0.7, 0) (1.3, 1);
+	METHOD : COG;
+	DEFAULT := 0.000;
+END_DEFUZZIFY
+
+DEFUZZIFY brake
+	TERM nobrake :=	(-0.1, 1) (0.035, 0) ;
+	TERM fullbrake := (0.035, 0) (1.1, 1);
+	METHOD : COG;
+	DEFAULT := 0.000;
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	AND : MIN;
+	ACT : MIN;	
+	ACCU : MAX;
+
+	RULE 1 : IF (track9 IS dist_near) THEN accelerate IS medgas;
+	RULE 2 : IF (track9 IS dist_medium) THEN accelerate IS medgas;
+	RULE 2 : IF (track9 IS dist_far) THEN accelerate IS medgas;
+	
+	RULE 4: IF track0 is very_large and track5 is very_large and track9  is very_large and track13  is very_large and track18  is very_large and trackPos is very_large and speed  is very_large and angle  is very_large THEN steering  is very_large;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is very_small and track13  is very_small and track18  is very_small and trackPos is very_small and speed  is very_small and angle  is very_small THEN steering  is very_small;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is very_large and track13  is very_small and track18  is very_small and trackPos is     medium and speed  is      large and angle  is     medium THEN steering  is     medium;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is very_large and track13  is very_small and track18  is very_small and trackPos is     medium and speed  is     medium and angle  is     medium THEN steering  is     medium;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is      small and track13  is very_small and track18  is very_small and trackPos is     medium and speed  is      small and angle  is     medium THEN steering  is     medium;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is      large and track13  is very_small and track18  is very_small and trackPos is     medium and speed  is      large and angle  is     medium THEN steering  is     medium;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is      small and track13  is very_small and track18  is very_small and trackPos is      large and speed  is      large and angle  is     medium THEN steering  is     medium;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is      large and track13  is very_small and track18  is very_small and trackPos is      large and speed  is     medium and angle  is     medium THEN steering  is     medium;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is      small and track13  is very_small and track18  is very_small and trackPos is      large and speed  is     medium and angle  is     medium THEN steering  is     medium;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is      small and track13  is very_small and track18  is very_small and trackPos is     medium and speed  is     medium and angle  is     medium THEN steering  is      small;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is     medium and track13  is very_small and track18  is very_small and trackPos is     medium and speed  is     medium and angle  is     medium THEN steering  is     medium;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is      small and track13  is very_small and track18  is very_small and trackPos is     medium and speed  is     medium and angle  is     medium THEN steering  is     medium;
+	RULE 4: IF track0 is very_small and track5 is     medium and track9  is      small and track13  is very_small and track18  is very_small and trackPos is      large and speed  is      small and angle  is     medium THEN steering  is      large;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is      small and track13  is very_large and track18  is very_small and trackPos is     medium and speed  is      small and angle  is     medium THEN steering  is     medium;
+	RULE 4: IF track0 is very_small and track5 is      small and track9  is      small and track13  is very_small and track18  is very_small and trackPos is      large and speed  is      small and angle  is     medium THEN steering  is      large;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is      small and track13  is very_small and track18  is very_small and trackPos is      large and speed  is      small and angle  is     medium THEN steering  is      large;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is     medium and track13  is very_small and track18  is very_small and trackPos is      large and speed  is      small and angle  is     medium THEN steering  is      large;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is very_large and track13  is very_small and track18  is very_small and trackPos is     medium and speed  is      small and angle  is     medium THEN steering  is     medium;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is      small and track13  is very_small and track18  is very_small and trackPos is      large and speed  is      small and angle  is     medium THEN steering  is     medium;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is      small and track13  is very_small and track18  is very_small and trackPos is      small and speed  is     medium and angle  is     medium THEN steering  is      small;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is     medium and track13  is very_small and track18  is very_small and trackPos is     medium and speed  is      large and angle  is     medium THEN steering  is     medium;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is      small and track13  is very_small and track18  is very_small and trackPos is     medium and speed  is      small and angle  is     medium THEN steering  is      small;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is      small and track13  is      small and track18  is very_small and trackPos is     medium and speed  is      small and angle  is     medium THEN steering  is     medium;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is      small and track13  is very_small and track18  is very_small and trackPos is      small and speed  is     medium and angle  is     medium THEN steering  is     medium;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is     medium and track13  is very_small and track18  is very_small and trackPos is      large and speed  is     medium and angle  is     medium THEN steering  is     medium;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is      small and track13  is      small and track18  is very_small and trackPos is     medium and speed  is     medium and angle  is     medium THEN steering  is      small;
+	RULE 4: IF track0 is very_small and track5 is very_small and track9  is      small and track13  is very_small and track18  is very_small and trackPos is     medium and speed  is     medium and angle  is     medium THEN steering  is      large;
+	
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK

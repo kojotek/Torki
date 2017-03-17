@@ -44,8 +44,9 @@ public class SocketHandler {
 
 	public void send(String msg) {
 
-		if (verbose)
-			System.out.println("Sending: " + msg);
+		if (verbose){
+                    //System.out.println("Sending: " + msg);
+                }
 		try {
 			byte[] buffer = msg.getBytes();
 			socket
@@ -63,13 +64,15 @@ public class SocketHandler {
 			socket.receive(packet);
 			String received = new String(packet.getData(), 0, packet
 					.getLength());
-			if (verbose)
-				System.out.println("Received: " + received);
-			return received;
+			if (verbose){
+				//System.out.println("Received: " + received);
+                        }
+                        return received;
 		} catch(SocketTimeoutException se){			
-			if (verbose)
-				System.out.println("Socket Timeout!");
-		} catch (Exception e) {
+			if (verbose){
+				//System.out.println("Socket Timeout!");
+                        }
+                } catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;

@@ -34,11 +34,11 @@ public class DeadSimpleSoloController extends Controller {
     }
 
     public void reset() {
-		System.out.println("Restarting the race!");
+	//System.out.println("Restarting the race!");
 		
 	}
 
 	public void shutdown() {
-		System.out.println("Bye bye!");		
+		//System.out.println("Bye bye!");		
 	}
 }

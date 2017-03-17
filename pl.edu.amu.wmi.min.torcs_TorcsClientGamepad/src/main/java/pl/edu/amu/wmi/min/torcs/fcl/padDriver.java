@@ -14,6 +14,10 @@ public class padDriver extends Controller {
     private  int[] gearUp = {9000, 8000, 8000, 8000, 8000, 0};
     private  int[] gearDown = {0, 2500, 3000, 3000, 3500, 3500};
     private float x,z,b = 0.0f;
+    private float smoothedSteering = 0.0f;
+    //private float currentFrameTimeStamp = (float)System.nanoTime()/1000.0f;
+    //private float lastFrameTimeStamp =  (float)System.nanoTime()/1000.0f;
+    //private float frameTime = 1.0f;
     
     Action toReturn;
 
@@ -51,7 +55,12 @@ public class padDriver extends Controller {
     
     
     @Override
-    public Action control(SensorModel sensors) {    
+    public Action control(SensorModel sensors) {
+        
+        //currentFrameTimeStamp = (float)System.nanoTime()/1000.0f;
+        //frameTime = currentFrameTimeStamp - lastFrameTimeStamp;
+        //lastFrameTimeStamp = currentFrameTimeStamp;
+        
         
         pad.poll();
         net.java.games.input.EventQueue queue = pad.getEventQueue();
@@ -76,6 +85,7 @@ public class padDriver extends Controller {
         }
 
         
+        
         if (x > 0.3f ){
             toReturn.steering = -1.0f * ((0.6f * x * x) + 0.7f * x - 0.20f) * (x/2.0f + 0.5f);
         }
@@ -88,7 +98,14 @@ public class padDriver extends Controller {
         }
             
         
-        
+        if(toReturn.steering == 0.0f){
+            smoothedSteering += (toReturn.steering - smoothedSteering) * 20.0f/60.0f; 
+        }
+        else{
+            smoothedSteering += (toReturn.steering - smoothedSteering) * 3.0f/60.0f; 
+        }
+        toReturn.steering = smoothedSteering / 3.0f; 
+                
         float brakeRaw = 0.0f;
         
         if (z < -0.25f){
@@ -251,13 +268,12 @@ public class padDriver extends Controller {
         strBuilder.append(",");
 
         System.out.println(strBuilder.toString());
-        
         return toReturn;
     }
     
     @Override
     public void reset() {
-        System.out.println("Restarting the race!");
+        //System.out.println("Restarting the race!");
         
     }
     

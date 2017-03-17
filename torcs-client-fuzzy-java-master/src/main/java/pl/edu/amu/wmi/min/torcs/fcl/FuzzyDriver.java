@@ -24,6 +24,8 @@ import net.sourceforge.cig.torcs.Controller;
 import net.sourceforge.cig.torcs.Action;
 import net.sourceforge.cig.torcs.SensorModel;
 import net.sourceforge.jFuzzyLogic.FIS;
+import net.sourceforge.jFuzzyLogic.membership.MembershipFunctionGaussian;
+import net.sourceforge.jFuzzyLogic.membership.Value;
 import net.sourceforge.jFuzzyLogic.rule.Variable;
 
 
@@ -35,6 +37,8 @@ public class FuzzyDriver extends Controller {
     private  int[] gearUp = {9000, 8000, 8000, 8000, 8000, 0};
     private  int[] gearDown = {0, 2500, 3000, 3000, 3500, 3500};
     boolean pulse = true;
+    
+    
     
         public FuzzyDriver(FIS fis) {
         this.fis = fis;
@@ -56,7 +60,7 @@ public class FuzzyDriver extends Controller {
     @Override
     public Action control(SensorModel sensors) {
         Action toReturn = new Action();
-        
+
         // Set the input
         // Track [0,200] (m)
         // Vector of 19 range finder sensors: each sensors returns the
@@ -78,6 +82,18 @@ public class FuzzyDriver extends Controller {
             fis.setVariable("track" + i, trackEdge[i]);
         }
 
+        double weightedMean = 0.0f;
+        double weightsSum = 0.0f;
+        
+        for (int i = 0; i < trackEdge.length; i++) {
+            weightsSum += trackEdge[i];
+            weightedMean += angles[i] * trackEdge[i];
+        }
+        
+        weightedMean /= weightsSum;
+        
+        fis.setVariable("weightedMean", weightedMean);
+        
         double[] curvePredictions = new double[trackEdge.length/2];
         for (int i = 10; i < trackEdge.length; i++) {
             double curvePrediction = Math.log10(trackEdge[i]/trackEdge[18-i]);
@@ -155,7 +171,7 @@ public class FuzzyDriver extends Controller {
 
 
         StringBuilder strBuilder = new StringBuilder();
-
+        
         for (int i = 0; i < angles.length; i++) {
             strBuilder.append(trackEdge[i]);
             strBuilder.append(", ");
@@ -190,6 +206,9 @@ public class FuzzyDriver extends Controller {
         strBuilder.append(toReturn.gear);
         strBuilder.append(",");
 
+        strBuilder.append(weightedMean);
+        strBuilder.append(",");
+        
         System.out.println(strBuilder.toString());
         
         return toReturn;

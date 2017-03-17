@@ -136,12 +136,11 @@ public class Client {
                     /*
 		     * Check if race is restarted
                      */
-                    System.out.println(inMsg);
                     
                     if (inMsg.indexOf("***restart***") >= 0) {
                         driver.reset();
                         //if (verbose) {
-                            System.out.println("Server restarting!");
+                            //System.out.println("Server restarting!");
                         //}
                         break;
                     }

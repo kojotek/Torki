@@ -52,7 +52,8 @@ public class Client {
     private static Stage stage;
     private static String trackName;
     private static String gearsFile;
-
+    private static String trackDataFile;
+    
     public static void main(String[] args) {
 
         parseParameters(args);
@@ -91,7 +92,7 @@ public class Client {
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        
         /* Build init string */
         float[] angles = driver.initAngles();
         String initStr = clientId + "(init";
@@ -127,8 +128,15 @@ public class Client {
 		     * Check if race is ended (shutdown)
                      */
                     if (inMsg.indexOf("***shutdown***") >= 0) {
+                       /*
                         shutdownOccurred = true;
                         System.out.println("Server shutdown!");
+                        break;
+                        */
+                       driver.reset();
+                        if (verbose) {
+                            System.out.println("Server restarting!");
+                        }
                         break;
                     }
 
@@ -138,7 +146,7 @@ public class Client {
                     if (inMsg.indexOf("***restart***") >= 0) {
                         driver.reset();
                         if (verbose) {
-                            System.out.println("Server restarting!");
+                            System.err.println("Server restarting!");
                         }
                         break;
                     }
@@ -154,7 +162,7 @@ public class Client {
                     currStep++;
                     mySocket.send(action.toString());
                 } else {
-                    System.out.println("Server did not respond within the timeout");
+                    System.err.println("Server did not respond within the timeout");
                 }
             }
 
@@ -177,7 +185,7 @@ public class Client {
         host = "localhost";
         clientId = "SCR";
         verbose = false;
-        maxEpisodes = 1;
+        maxEpisodes = 10000;
         maxSteps = 0;
         stage = Stage.UNKNOWN;
         trackName = "unknown";
@@ -211,6 +219,9 @@ public class Client {
             }
             if (entity.equals("gearPreferences")) {
                 gearsFile = value;
+            }
+            if (entity.equals("trackData")) {
+                trackDataFile = value;
             }
             if (entity.equals("stage")) {
                 stage = Stage.fromInt(Integer.parseInt(value));
