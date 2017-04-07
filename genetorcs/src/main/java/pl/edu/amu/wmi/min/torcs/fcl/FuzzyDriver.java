@@ -1,14 +1,32 @@
 package pl.edu.amu.wmi.min.torcs.fcl;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.parsers.ParserConfigurationException;
 import net.sourceforge.cig.torcs.Controller;
 import net.sourceforge.cig.torcs.Action;
 import net.sourceforge.cig.torcs.SensorModel;
 import net.sourceforge.jFuzzyLogic.FIS;
+import net.sourceforge.jFuzzyLogic.Gpr;
 import net.sourceforge.jFuzzyLogic.membership.MembershipFunctionGaussian;
 import net.sourceforge.jFuzzyLogic.membership.Value;
 import net.sourceforge.jFuzzyLogic.rule.Variable;
 import org.jgap.InvalidConfigurationException;
+import org.jgap.UnsupportedRepresentationException;
+import org.jgap.data.DataTreeBuilder;
+import org.jgap.data.IDataCreators;
+import org.jgap.xml.GeneCreationException;
+import org.jgap.xml.ImproperXMLException;
+import org.jgap.xml.XMLDocumentBuilder;
+import org.jgap.xml.XMLManager;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+
 
 
 public class FuzzyDriver extends Controller {
@@ -20,11 +38,12 @@ public class FuzzyDriver extends Controller {
     private  int[] gearUp = {9000, 8000, 8000, 8000, 8000, 0};
     private  int[] gearDown = {0, 2500, 3000, 3000, 3500, 3500};
     boolean pulse = true;
+    double bestDistanceSoFar = 0.0f;
     
     
     int counter = 0;
     
-        public FuzzyDriver(FIS fis) throws InvalidConfigurationException {
+        public FuzzyDriver(FIS fis) throws InvalidConfigurationException, ParserConfigurationException, ImproperXMLException, UnsupportedRepresentationException, GeneCreationException, SAXException, IOException {
         this.fis = fis;
         
         this.angles = new float[19];
@@ -164,9 +183,27 @@ public class FuzzyDriver extends Controller {
         
         geneticAlg.fitFunc.distance = distanceRaced;
         
+        if ((counter > Consts.earlyKillAfter && distanceRaced < 100.0f) 
+            || sensors.getDamage() > 100.0f){
+            counter = Integer.MAX_VALUE;
+        }
+        
+        if (distanceRaced > 50.0f && trackEdge[9] <= 0.0f){
+            counter = Integer.MAX_VALUE;
+        }
+        
         if (counter >= Consts.ticksPerCandidate){
+            if (geneticAlg.fitFunc.distance <= 0.0f){
+                geneticAlg.fitFunc.distance = 0f;
+            }
             geneticAlg.fitFunc.ready = true;
             toReturn.restartRace = true;
+            
+            if (distanceRaced > bestDistanceSoFar){
+                Gpr.toFile("fcl/robot_best_fit.fcl", fis.getFunctionBlock(null).toString());
+                bestDistanceSoFar = distanceRaced;
+            }
+            
         }
         counter++;
         
@@ -231,10 +268,27 @@ public class FuzzyDriver extends Controller {
 
         @Override
         public void run() {
-            for( int i = 0; i < Consts.generations; i++ )
+            for( int i = geneticAlg.starGen; i < Consts.generations; i++ )
             {
                 System.err.println("Generation " + Integer.toString(i));
                 geneticAlg.population.evolve();
+                
+                DataTreeBuilder builder = DataTreeBuilder.getInstance();
+                IDataCreators doc;
+                try {
+                    doc = builder.representGenotypeAsDocument(geneticAlg.population);
+                    XMLDocumentBuilder docbuilder = new XMLDocumentBuilder();
+                    Document xmlDoc = null;
+                    xmlDoc = (Document) docbuilder.buildDocument(doc);
+                    XMLManager.writeFile(xmlDoc, new File("fcl/generations/" + Integer.toString(i) + ".xml"));
+                } catch (IOException ex) {
+                    ex.printStackTrace(System.err);
+                    Logger.getLogger(FuzzyDriver.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (Exception ex) {
+                    ex.printStackTrace(System.err);
+                    Logger.getLogger(FuzzyDriver.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
             }
         }
     }
