@@ -1,0 +1,502 @@
+FUNCTION_BLOCK driver
+
+VAR_INPUT
+	angle : REAL;
+	curvePred0 : REAL;
+	curvePred1 : REAL;
+	curvePred2 : REAL;
+	curvePred3 : REAL;
+	curvePred4 : REAL;
+	curvePred5 : REAL;
+	curvePred6 : REAL;
+	curvePred7 : REAL;
+	curvePred8 : REAL;
+	curvePred9 : REAL;
+	distanceRaced : REAL;
+	opponent0 : REAL;
+	opponent1 : REAL;
+	opponent10 : REAL;
+	opponent11 : REAL;
+	opponent12 : REAL;
+	opponent13 : REAL;
+	opponent14 : REAL;
+	opponent15 : REAL;
+	opponent16 : REAL;
+	opponent17 : REAL;
+	opponent18 : REAL;
+	opponent19 : REAL;
+	opponent2 : REAL;
+	opponent20 : REAL;
+	opponent21 : REAL;
+	opponent22 : REAL;
+	opponent23 : REAL;
+	opponent24 : REAL;
+	opponent25 : REAL;
+	opponent26 : REAL;
+	opponent27 : REAL;
+	opponent28 : REAL;
+	opponent29 : REAL;
+	opponent3 : REAL;
+	opponent30 : REAL;
+	opponent31 : REAL;
+	opponent32 : REAL;
+	opponent33 : REAL;
+	opponent34 : REAL;
+	opponent35 : REAL;
+	opponent4 : REAL;
+	opponent5 : REAL;
+	opponent6 : REAL;
+	opponent7 : REAL;
+	opponent8 : REAL;
+	opponent9 : REAL;
+	speed : REAL;
+	track0 : REAL;
+	track1 : REAL;
+	track10 : REAL;
+	track11 : REAL;
+	track12 : REAL;
+	track13 : REAL;
+	track14 : REAL;
+	track15 : REAL;
+	track16 : REAL;
+	track17 : REAL;
+	track18 : REAL;
+	track2 : REAL;
+	track3 : REAL;
+	track4 : REAL;
+	track5 : REAL;
+	track6 : REAL;
+	track7 : REAL;
+	track8 : REAL;
+	track9 : REAL;
+	trackPos : REAL;
+	weightedMean : REAL;
+END_VAR
+
+VAR_OUTPUT
+	accelerate : REAL;
+	brake : REAL;
+	steering : REAL;
+END_VAR
+
+FUZZIFY angle
+	TERM center :=  (-0.9, 0.0) (0.0, 1.0) (0.9, 0.0) ;
+	TERM drift_left :=  (-75.0, 1.0) (-5.0, 1.0) (-3.0, 0.0) ;
+	TERM drift_right :=  (3.0, 0.0) (5.0, 1.0) (75.0, 0.0) ;
+	TERM left :=  (-3.15, 1.0) (-0.9, 1.0) (0.0, 0.0) ;
+	TERM right :=  (0.0, 0.0) (0.9, 1.0) (3.15, 1.0) ;
+END_FUZZIFY
+
+FUZZIFY curvePred0
+	TERM pred_center :=  (-1.0, 0.0) (-0.01, 1.0) (0.01, 1.0) (1.0, 0.0) ;
+	TERM pred_left :=  (-20.0, 1.0) (-0.2, 0.0) ;
+	TERM pred_right :=  (0.2, 0.0) (20.0, 1.0) ;
+END_FUZZIFY
+
+FUZZIFY curvePred1
+	TERM pred_center :=  (-1.0, 0.0) (-0.1, 1.0) (0.1, 1.0) (1.0, 0.0) ;
+	TERM pred_left :=  (-20.0, 1.0) (-0.2, 0.0) ;
+	TERM pred_right :=  (0.2, 0.0) (20.0, 1.0) ;
+END_FUZZIFY
+
+FUZZIFY curvePred2
+	TERM pred_center :=  (-1.0, 0.0) (-0.2, 1.0) (0.2, 1.0) (1.0, 0.0) ;
+	TERM pred_left :=  (-20.0, 1.0) (-0.2, 0.0) ;
+	TERM pred_right :=  (0.2, 0.0) (20.0, 1.0) ;
+END_FUZZIFY
+
+FUZZIFY curvePred3
+	TERM pred_center :=  (-1.0, 0.0) (-0.3, 1.0) (0.3, 1.0) (1.0, 0.0) ;
+	TERM pred_left :=  (-20.0, 1.0) (-0.2, 0.0) ;
+	TERM pred_right :=  (0.2, 0.0) (20.0, 1.0) ;
+END_FUZZIFY
+
+FUZZIFY curvePred4
+END_FUZZIFY
+
+FUZZIFY curvePred5
+END_FUZZIFY
+
+FUZZIFY curvePred6
+END_FUZZIFY
+
+FUZZIFY curvePred7
+END_FUZZIFY
+
+FUZZIFY curvePred8
+END_FUZZIFY
+
+FUZZIFY curvePred9
+END_FUZZIFY
+
+FUZZIFY distanceRaced
+	TERM not_start :=  (200.0, 0.0) (250.0, 1.0) ;
+	TERM start :=  (0.0, 1.0) (200.0, 1.0) (250.0, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY opponent0
+END_FUZZIFY
+
+FUZZIFY opponent1
+END_FUZZIFY
+
+FUZZIFY opponent10
+END_FUZZIFY
+
+FUZZIFY opponent11
+END_FUZZIFY
+
+FUZZIFY opponent12
+END_FUZZIFY
+
+FUZZIFY opponent13
+END_FUZZIFY
+
+FUZZIFY opponent14
+END_FUZZIFY
+
+FUZZIFY opponent15
+END_FUZZIFY
+
+FUZZIFY opponent16
+END_FUZZIFY
+
+FUZZIFY opponent17
+END_FUZZIFY
+
+FUZZIFY opponent18
+END_FUZZIFY
+
+FUZZIFY opponent19
+END_FUZZIFY
+
+FUZZIFY opponent2
+END_FUZZIFY
+
+FUZZIFY opponent20
+END_FUZZIFY
+
+FUZZIFY opponent21
+END_FUZZIFY
+
+FUZZIFY opponent22
+END_FUZZIFY
+
+FUZZIFY opponent23
+END_FUZZIFY
+
+FUZZIFY opponent24
+END_FUZZIFY
+
+FUZZIFY opponent25
+END_FUZZIFY
+
+FUZZIFY opponent26
+END_FUZZIFY
+
+FUZZIFY opponent27
+END_FUZZIFY
+
+FUZZIFY opponent28
+END_FUZZIFY
+
+FUZZIFY opponent29
+END_FUZZIFY
+
+FUZZIFY opponent3
+END_FUZZIFY
+
+FUZZIFY opponent30
+END_FUZZIFY
+
+FUZZIFY opponent31
+END_FUZZIFY
+
+FUZZIFY opponent32
+END_FUZZIFY
+
+FUZZIFY opponent33
+END_FUZZIFY
+
+FUZZIFY opponent34
+END_FUZZIFY
+
+FUZZIFY opponent35
+END_FUZZIFY
+
+FUZZIFY opponent4
+END_FUZZIFY
+
+FUZZIFY opponent5
+END_FUZZIFY
+
+FUZZIFY opponent6
+END_FUZZIFY
+
+FUZZIFY opponent7
+END_FUZZIFY
+
+FUZZIFY opponent8
+END_FUZZIFY
+
+FUZZIFY opponent9
+END_FUZZIFY
+
+FUZZIFY speed
+	TERM sp1 :=  (-1.0, 0.0) (0.0, 1.0) (50.0, 1.0) (70.0, 0.0) ;
+	TERM sp2 :=  (50.0, 0.0) (70.0, 1.0) (110.0, 1.0) (130.0, 0.0) ;
+	TERM sp3 :=  (110.0, 0.0) (130.0, 1.0) (170.0, 1.0) (190.0, 0.0) ;
+	TERM sp4 :=  (170.0, 0.0) (190.0, 1.0) (230.0, 1.0) (250.0, 0.0) ;
+	TERM sp5 :=  (230.0, 0.0) (250.0, 1.0) (290.0, 1.0) (350.0, 0.0) ;
+	TERM speed_fast :=  (140.0, 0.0) (150.0, 1.0) (500.0, 1.0) ;
+	TERM speed_medium :=  (90.0, 0.0) (100.0, 1.0) (140.0, 1.0) (150.0, 0.0) ;
+	TERM speed_slow :=  (0.0, 1.0) (90.0, 1.0) (120.0, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY track0
+END_FUZZIFY
+
+FUZZIFY track1
+END_FUZZIFY
+
+FUZZIFY track10
+	TERM dist_far :=  (20.0, 0.0) (30.0, 1.0) (200.0, 1.0) ;
+	TERM dist_medium :=  (2.0, 0.0) (10.0, 1.0) (20.0, 1.0) (30.0, 0.0) ;
+	TERM dist_near :=  (0.0, 1.0) (2.0, 1.0) (5.0, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY track11
+	TERM dist_far :=  (20.0, 0.0) (25.0, 1.0) (200.0, 1.0) ;
+	TERM dist_medium :=  (2.0, 0.0) (5.0, 1.0) (20.0, 1.0) (25.0, 0.0) ;
+	TERM dist_near :=  (0.0, 1.0) (2.0, 1.0) (5.0, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY track12
+	TERM dist_far :=  (10.0, 0.0) (20.0, 1.0) (200.0, 1.0) ;
+	TERM dist_medium :=  (0.0, 1.0) (20.0, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY track13
+END_FUZZIFY
+
+FUZZIFY track14
+END_FUZZIFY
+
+FUZZIFY track15
+END_FUZZIFY
+
+FUZZIFY track16
+	TERM dist_far :=  (5.0, 0.0) (10.0, 1.0) (200.0, 1.0) ;
+	TERM dist_medium :=  (0.0, 1.0) (10.0, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY track17
+END_FUZZIFY
+
+FUZZIFY track18
+END_FUZZIFY
+
+FUZZIFY track2
+	TERM dist_far :=  (5.0, 0.0) (10.0, 1.0) (200.0, 1.0) ;
+	TERM dist_medium :=  (0.0, 1.0) (10.0, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY track3
+END_FUZZIFY
+
+FUZZIFY track4
+END_FUZZIFY
+
+FUZZIFY track5
+END_FUZZIFY
+
+FUZZIFY track6
+	TERM dist_far :=  (10.0, 0.0) (20.0, 1.0) (200.0, 1.0) ;
+	TERM dist_medium :=  (0.0, 1.0) (20.0, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY track7
+	TERM dist_far :=  (20.0, 0.0) (25.0, 1.0) (200.0, 1.0) ;
+	TERM dist_medium :=  (2.0, 0.0) (5.0, 1.0) (20.0, 1.0) (25.0, 0.0) ;
+	TERM dist_near :=  (0.0, 1.0) (2.0, 1.0) (5.0, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY track8
+	TERM dist_far :=  (20.0, 0.0) (30.0, 1.0) (200.0, 1.0) ;
+	TERM dist_medium :=  (2.0, 0.0) (10.0, 1.0) (20.0, 1.0) (30.0, 0.0) ;
+	TERM dist_near :=  (0.0, 1.0) (2.0, 1.0) (5.0, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY track9
+	TERM dist_far :=  (45.0, 0.0) (55.0, 1.0) (199.0, 1.0) (200.0, 0.0) ;
+	TERM dist_medium :=  (30.0, 1.0) (45.0, 1.0) (55.0, 0.0) ;
+	TERM dist_near :=  (0.0, 1.0) (30.0, 1.0) (45.0, 0.0) ;
+	TERM dist_very_far :=  (199.0, 0.0) (200.0, 1.0) (201.0, 0.0) ;
+	TERM tr1 :=  (-1.0, 0.0) (0.0, 1.0) (30.0, 1.0) (40.0, 0.0) ;
+	TERM tr2 :=  (30.0, 0.0) (40.0, 1.0) (70.0, 1.0) (80.0, 0.0) ;
+	TERM tr3 :=  (70.0, 0.0) (80.0, 1.0) (110.0, 1.0) (120.0, 0.0) ;
+	TERM tr4 :=  (110.0, 0.0) (120.0, 1.0) (150.0, 1.0) (160.0, 0.0) ;
+	TERM tr5 :=  (150.0, 0.0) (160.0, 1.0) (190.0, 1.0) (199.0, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY trackPos
+	TERM center :=  (-0.6, 0.0) (-0.3, 1.0) (0.3, 1.0) (0.6, 0.0) ;
+	TERM left :=  (0.3, 0.0) (0.6, 1.0) (9.0, 1.0) ;
+	TERM right :=  (-9.0, 1.0) (-0.6, 1.0) (-0.3, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY weightedMean
+	TERM center :=  (-2.0, 0.0) (0.0, 1.0) (2.0, 0.0) ;
+	TERM left :=  (-90.0, 1.0) (-1.0, 0.0) ;
+	TERM right :=  (0.0, 0.0) (90.0, 1.0) ;
+	TERM wm1 := GAUSS 12.0 4.0;
+	TERM wm10 := GAUSS -6.0 4.0;
+	TERM wm11 := GAUSS -8.0 4.0;
+	TERM wm12 := GAUSS -10.0 4.0;
+	TERM wm13 := GAUSS -12.0 4.0;
+	TERM wm2 := GAUSS 10.0 4.0;
+	TERM wm3 := GAUSS 8.0 4.0;
+	TERM wm4 := GAUSS 6.0 4.0;
+	TERM wm5 := GAUSS 4.0 4.0;
+	TERM wm6 := GAUSS 2.0 4.0;
+	TERM wm7 := GAUSS 0.0 4.0;
+	TERM wm8 := GAUSS -2.0 4.0;
+	TERM wm9 := GAUSS -4.0 4.0;
+END_FUZZIFY
+
+DEFUZZIFY accelerate
+	TERM acc1 := TRIAN 0.981391202616383 1.2033816157183463 1.4253720288203098;
+	TERM acc10 := TRIAN 0.7922075832261494 1.0141979963281127 1.2361884094300761;
+	TERM acc11 := TRIAN -1.0876256013985548 -0.8656351882965915 -0.6436447751946281;
+	TERM acc12 := TRIAN 0.2004553132052693 0.42244572630723265 0.644436139409196;
+	TERM acc13 := TRIAN 0.6187485263236013 0.8407389394255647 1.062729352527528;
+	TERM acc14 := TRIAN 0.837465088973193 1.0594555020751564 1.2814459151771198;
+	TERM acc15 := TRIAN 1.0975403428416748 1.3195307559436382 1.5415211690456017;
+	TERM acc16 := TRIAN 1.117412792947064 1.3394032060490275 1.561393619150991;
+	TERM acc17 := TRIAN 0.40559401132292827 0.6275844244248916 0.8495748375268549;
+	TERM acc18 := TRIAN 0.8138012568364331 1.0357916699383964 1.2577820830403599;
+	TERM acc19 := TRIAN 0.5905323055299568 0.8125227186319202 1.0345131317338836;
+	TERM acc2 := TRIAN -0.08052268705056001 0.14146772605140334 0.36345813915336667;
+	TERM acc20 := TRIAN 0.8327476481355215 1.0547380612374848 1.2767284743394482;
+	TERM acc21 := TRIAN -0.7379383265491887 -0.5159479134472253 -0.293957500345262;
+	TERM acc22 := TRIAN -0.28574635800183057 -0.06375594489986725 0.1582344682020961;
+	TERM acc23 := TRIAN 0.9575669766362312 1.1795573897381946 1.401547802840158;
+	TERM acc24 := TRIAN 0.38929982428386645 0.6112902373858298 0.8332806504877931;
+	TERM acc25 := TRIAN -0.7389993499310713 -0.517008936829108 -0.29501852372714465;
+	TERM acc3 := TRIAN 0.7310194539702809 0.9530098670722442 1.1750002801742077;
+	TERM acc4 := TRIAN 1.148139549912236 1.3701299630141994 1.5921203761161629;
+	TERM acc5 := TRIAN -0.2427506641974271 -0.020760251095463755 0.2012301620064996;
+	TERM acc6 := TRIAN -0.21209316352057464 0.009897249581388712 0.23188766268335206;
+	TERM acc7 := TRIAN 1.08489470087077 1.3068851139727333 1.5288755270746968;
+	TERM acc8 := TRIAN 0.514436791011691 0.7364272041136544 0.9584176172156177;
+	TERM acc9 := TRIAN -0.4937726491543729 -0.2717822360524096 -0.049791822950446235;
+	TERM fullgas :=  (0.9, 0.0) (1.0, 1.0) (1.1, 0.0) ;
+	TERM medgas :=  (0.3, 0.0) (0.5, 1.0) (0.7, 1.0) (0.8, 0.0) ;
+	TERM nogas :=  (0.0, 1.0) (0.3, 1.0) (0.5, 0.0) ;
+	METHOD : COG;
+	DEFAULT := 0.0;
+	RANGE := (-3.0 .. 5.0);
+END_DEFUZZIFY
+
+DEFUZZIFY brake
+	TERM brk1 := TRIAN -1.263809636774872 -0.9155063642356867 -0.5672030916965014;
+	TERM brk10 := TRIAN -1.272814754408106 -0.9245114818689208 -0.5762082093297356;
+	TERM brk11 := TRIAN 0.643098313010475 0.9914015855496603 1.3397048580888455;
+	TERM brk12 := TRIAN -1.1936459487010656 -0.8453426761618803 -0.497039403622695;
+	TERM brk13 := TRIAN -1.0466962662406583 -0.6983929937014729 -0.3500897211622876;
+	TERM brk14 := TRIAN -0.6335233959205333 -0.28522012338134806 0.06308314915783725;
+	TERM brk15 := TRIAN -0.08934916490192518 0.2589541076372601 0.6072573801764454;
+	TERM brk16 := TRIAN -0.4905269909727708 -0.1422237184335855 0.2060795541055998;
+	TERM brk17 := TRIAN 0.9354054145503714 1.2837086870895567 1.632011959628742;
+	TERM brk18 := TRIAN -1.032870889461587 -0.6845676169224018 -0.33626434438321645;
+	TERM brk19 := TRIAN -0.5251550506754497 -0.1768517781362644 0.1714514944029209;
+	TERM brk2 := TRIAN -1.1338277834321264 -0.7855245108929412 -0.43722123835375587;
+	TERM brk20 := TRIAN -0.41807455600757387 -0.06977128346838857 0.27853198907079674;
+	TERM brk21 := TRIAN 0.766031022482802 1.1143342950219872 1.4626375675611725;
+	TERM brk22 := TRIAN -0.7880568499062708 -0.4397535773670854 -0.09145030482790012;
+	TERM brk23 := TRIAN -0.8517450871894412 -0.503441814650256 -0.15513854211107064;
+	TERM brk24 := TRIAN -1.282433824908827 -0.9341305523696416 -0.5858272798304562;
+	TERM brk25 := TRIAN 1.1398285768572511 1.4881318493964364 1.8364351219356216;
+	TERM brk3 := TRIAN -0.9308995025033919 -0.5825962299642067 -0.23429295742502138;
+	TERM brk4 := TRIAN -0.33882755351687505 0.009475719022310258 0.35777899156149556;
+	TERM brk5 := TRIAN -0.6214421396666316 -0.2731388671274464 0.07516440541173891;
+	TERM brk6 := TRIAN -1.1237824031168162 -0.775479130577631 -0.42717585803844565;
+	TERM brk7 := TRIAN -0.7532363279659549 -0.4049330554267696 -0.0566297828875843;
+	TERM brk8 := TRIAN -0.40772432066240766 -0.05942104812322235 0.28888222441596295;
+	TERM brk9 := TRIAN -1.0016446890858342 -0.6533414165466489 -0.3050381440074636;
+	TERM fullbrake :=  (0.035, 0.0) (1.1, 1.0) ;
+	TERM nobrake :=  (-0.1, 1.0) (0.035, 0.0) ;
+	METHOD : COG;
+	DEFAULT := 0.0;
+	RANGE := (-3.0 .. 5.0);
+END_DEFUZZIFY
+
+DEFUZZIFY steering
+	TERM st1 := GAUSS -0.7727834143570604 0.8961827963289505;
+	TERM st10 := GAUSS 0.4861059358609041 0.09334892002229822;
+	TERM st11 := GAUSS 0.46034274709519307 0.5604677423200775;
+	TERM st12 := GAUSS -0.3763475651947541 0.3382289166847468;
+	TERM st13 := GAUSS 0.7727834143570604 0.8961827963289505;
+	TERM st2 := GAUSS 0.3763475651947541 0.3382289166847468;
+	TERM st3 := GAUSS -0.46034274709519307 0.5604677423200775;
+	TERM st4 := GAUSS -0.4861059358609041 0.09334892002229822;
+	TERM st5 := GAUSS -0.913708383967401 0.7254677862957761;
+	TERM st6 := GAUSS -0.058859164409285514 0.20092824350096175;
+	TERM st7 := GAUSS 0.0 0.7697328998485643;
+	TERM st8 := GAUSS 0.058859164409285514 0.20092824350096175;
+	TERM st9 := GAUSS 0.913708383967401 0.7254677862957761;
+	TERM stay_center :=  (-0.001, 0.0) (0.0, 1.0) (0.001, 0.0) ;
+	TERM turn_left :=  (0.0, 0.0) (1.0, 1.0) ;
+	TERM turn_right :=  (-1.0, 1.0) (0.0, 0.0) ;
+	METHOD : COG;
+	DEFAULT := 0.0;
+	RANGE := (-1.6 .. 1.6);
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	ACT : MIN;
+	ACCU : MAX;
+	AND : MIN;
+	RULE 1 : IF weightedMean IS wm1 THEN steering IS st1;
+	RULE 2 : IF weightedMean IS wm2 THEN steering IS st2;
+	RULE 3 : IF weightedMean IS wm3 THEN steering IS st2;
+	RULE 4 : IF weightedMean IS wm4 THEN steering IS st3;
+	RULE 5 : IF weightedMean IS wm5 THEN steering IS st5;
+	RULE 6 : IF weightedMean IS wm6 THEN steering IS st6;
+	RULE 7 : IF weightedMean IS wm7 THEN steering IS st7;
+	RULE 8 : IF weightedMean IS wm8 THEN steering IS st8;
+	RULE 9 : IF weightedMean IS wm9 THEN steering IS st9;
+	RULE 10 : IF weightedMean IS wm10 THEN steering IS st10;
+	RULE 11 : IF weightedMean IS wm11 THEN steering IS st11;
+	RULE 12 : IF weightedMean IS wm12 THEN steering IS st12;
+	RULE 13 : IF weightedMean IS wm13 THEN steering IS st13;
+	RULE 14 : IF (speed IS sp1) AND (track9 IS tr1) THEN accelerate IS acc1 , brake IS brk1;
+	RULE 15 : IF (speed IS sp1) AND (track9 IS tr2) THEN accelerate IS acc2 , brake IS brk2;
+	RULE 16 : IF (speed IS sp1) AND (track9 IS tr3) THEN accelerate IS acc3 , brake IS brk3;
+	RULE 17 : IF (speed IS sp1) AND (track9 IS tr4) THEN accelerate IS acc4 , brake IS brk4;
+	RULE 18 : IF (speed IS sp1) AND (track9 IS tr5) THEN accelerate IS acc5 , brake IS brk5;
+	RULE 19 : IF (speed IS sp2) AND (track9 IS tr1) THEN accelerate IS acc6 , brake IS brk6;
+	RULE 20 : IF (speed IS sp2) AND (track9 IS tr2) THEN accelerate IS acc7 , brake IS brk7;
+	RULE 21 : IF (speed IS sp2) AND (track9 IS tr3) THEN accelerate IS acc8 , brake IS brk8;
+	RULE 22 : IF (speed IS sp2) AND (track9 IS tr4) THEN accelerate IS acc9 , brake IS brk9;
+	RULE 23 : IF (speed IS sp2) AND (track9 IS tr5) THEN accelerate IS acc10 , brake IS brk10;
+	RULE 24 : IF (speed IS sp3) AND (track9 IS tr1) THEN accelerate IS acc11 , brake IS brk11;
+	RULE 25 : IF (speed IS sp3) AND (track9 IS tr2) THEN accelerate IS acc12 , brake IS brk12;
+	RULE 26 : IF (speed IS sp3) AND (track9 IS tr3) THEN accelerate IS acc13 , brake IS brk13;
+	RULE 27 : IF (speed IS sp3) AND (track9 IS tr4) THEN accelerate IS acc14 , brake IS brk14;
+	RULE 28 : IF (speed IS sp3) AND (track9 IS tr5) THEN accelerate IS acc15 , brake IS brk15;
+	RULE 29 : IF (speed IS sp4) AND (track9 IS tr1) THEN accelerate IS acc16 , brake IS brk16;
+	RULE 30 : IF (speed IS sp4) AND (track9 IS tr2) THEN accelerate IS acc17 , brake IS brk17;
+	RULE 31 : IF (speed IS sp4) AND (track9 IS tr3) THEN accelerate IS acc18 , brake IS brk18;
+	RULE 32 : IF (speed IS sp4) AND (track9 IS tr4) THEN accelerate IS acc19 , brake IS brk19;
+	RULE 33 : IF (speed IS sp4) AND (track9 IS tr5) THEN accelerate IS acc20 , brake IS brk20;
+	RULE 34 : IF (speed IS sp5) AND (track9 IS tr1) THEN accelerate IS acc21 , brake IS brk21;
+	RULE 35 : IF (speed IS sp5) AND (track9 IS tr2) THEN accelerate IS acc22 , brake IS brk22;
+	RULE 36 : IF (speed IS sp5) AND (track9 IS tr3) THEN accelerate IS acc23 , brake IS brk23;
+	RULE 37 : IF (speed IS sp5) AND (track9 IS tr4) THEN accelerate IS acc24 , brake IS brk24;
+	RULE 38 : IF (speed IS sp5) AND (track9 IS tr5) THEN accelerate IS acc25 , brake IS brk25;
+	RULE 39 : IF track9 IS dist_very_far THEN accelerate IS fullgas , brake IS nobrake;
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
+
