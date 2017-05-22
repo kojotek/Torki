@@ -35,6 +35,8 @@ public class TorcsFitnessFUnction extends FitnessFunction{
     public double evaluate(IChromosome ic) {
         
         System.err.println("Testing chromosome nr " + ++counter);
+        FuzzyDriver.unitNumber++;
+        
         
         synchronized (fis){
        double stMean0 = 0.0f;

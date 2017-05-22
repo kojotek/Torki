@@ -31,6 +31,8 @@ import org.xml.sax.SAXException;
 
 public class FuzzyDriver extends Controller {
     
+    public static volatile int generationNumber = 0;
+    public static volatile int unitNumber = 0;
     private GeneticAl geneticAlg;
     private final FIS fis;
     private final float[] angles;
@@ -200,9 +202,11 @@ public class FuzzyDriver extends Controller {
             toReturn.restartRace = true;
             
             if (distanceRaced > bestDistanceSoFar){
-                Gpr.toFile("fcl/robot_best_fit.fcl", fis.getFunctionBlock(null).toString());
+                Gpr.toFile("fcl/robot_best_fit_gen_" + generationNumber + ".fcl", fis.getFunctionBlock(null).toString());
                 bestDistanceSoFar = distanceRaced;
             }
+            
+            Gpr.toFile("fcl/robots/robot_" + generationNumber + "_unit_" + unitNumber + "_result_" + Math.round(distanceRaced) + ".fcl", fis.getFunctionBlock(null).toString());
             
         }
         counter++;
@@ -268,8 +272,13 @@ public class FuzzyDriver extends Controller {
 
         @Override
         public void run() {
+            
+            FuzzyDriver.unitNumber = 0;
+            
             for( int i = geneticAlg.starGen; i < Consts.generations; i++ )
             {
+                FuzzyDriver.generationNumber = i;
+                
                 System.err.println("Generation " + Integer.toString(i));
                 geneticAlg.population.evolve();
                 

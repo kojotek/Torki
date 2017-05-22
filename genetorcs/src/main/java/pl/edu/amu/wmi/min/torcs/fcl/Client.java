@@ -27,11 +27,16 @@ import net.sourceforge.cig.torcs.SocketHandler;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.parsers.ParserConfigurationException;
 import net.sourceforge.jFuzzyLogic.FIS;
 
 import net.sourceforge.cig.torcs.Controller.Stage;
 import org.antlr.works.visualization.graphics.GRenderer;
 import org.jgap.InvalidConfigurationException;
+import org.jgap.UnsupportedRepresentationException;
+import org.jgap.xml.GeneCreationException;
+import org.jgap.xml.ImproperXMLException;
+import org.xml.sax.SAXException;
 
 /**
  * This class is based on original Computational Intelligence in Games TORCS
@@ -55,7 +60,7 @@ public class Client {
     private static String gearsFile;
     private static String trackDataFile;
     
-    public static void main(String[] args) throws InvalidConfigurationException {
+    public static void main(String[] args) throws InvalidConfigurationException, ParserConfigurationException, ImproperXMLException, UnsupportedRepresentationException, GeneCreationException, SAXException, IOException {
 
         parseParameters(args);
         SocketHandler mySocket = new SocketHandler(host, port, verbose);
