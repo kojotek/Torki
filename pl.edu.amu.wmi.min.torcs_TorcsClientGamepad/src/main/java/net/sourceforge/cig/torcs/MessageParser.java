@@ -23,6 +23,7 @@ public class MessageParser {
     private String message;
     
     public MessageParser(String message) {
+        
     	this.message = message;
         //System.out.println(message);
         StringTokenizer mt = new StringTokenizer(message, "(");

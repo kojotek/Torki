@@ -6,10 +6,15 @@
 package net.sourceforge.cig.torcs;
 
 import pl.edu.amu.wmi.min.torcs.fcl.GearPreference;
+import pl.edu.amu.wmi.min.torcs.fcl.RacingLine;
 
 public abstract class Controller {
 
     public void setGearsPreferences(GearPreference gPref) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    public void setRacingLine(RacingLine rLine) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

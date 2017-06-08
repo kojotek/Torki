@@ -5,3 +5,6 @@ copy /y C:\Users\admin\Documents\GitHub\Torki\Torki_Optimization_2\target\TorcsC
 copy /y C:\Users\admin\Documents\GitHub\Torki\neurotorki\target\TorcsClientFcl-1.0-jar-with-dependencies.jar C:\Users\admin\Documents\GitHub\Torki\min-torcs\neuro.jar
 copy /y C:\Users\admin\Documents\GitHub\Torki\normalized_torcs\target\TorcsClientFcl-1.0-jar-with-dependencies.jar C:\Users\admin\Documents\GitHub\Torki\min-torcs\normalizedTorcs.jar
 copy /y C:\Users\admin\Documents\GitHub\Torki\genetorcs\target\TorcsClientFcl-1.0-jar-with-dependencies.jar C:\Users\admin\Documents\GitHub\Torki\min-torcs\genetorcs.jar
+copy /y C:\Users\admin\Documents\GitHub\Torki\keypadTorcs\target\TorcsClientFcl-1.0-jar-with-dependencies.jar C:\Users\admin\Documents\GitHub\Torki\min-torcs\TorcsClientKeyboard.jar
+
+

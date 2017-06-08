@@ -5,12 +5,6 @@
 */
 package net.sourceforge.cig.torcs;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Administrator
- * Date: Mar 4, 2008
- * Time: 3:35:31 PM
- */
 public class Action {
 
     public double accelerate = 0; // 0..1

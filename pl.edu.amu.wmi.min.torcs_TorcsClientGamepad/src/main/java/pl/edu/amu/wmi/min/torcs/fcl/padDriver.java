@@ -3,25 +3,36 @@ import java.util.List;
 import net.sourceforge.cig.torcs.Controller;
 import net.sourceforge.cig.torcs.Action;
 import net.sourceforge.cig.torcs.SensorModel;
-
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
 
 public class padDriver extends Controller {
 
     boolean pulse;
     net.java.games.input.Controller pad;
     private final float[] angles;
+    private List<Point2D.Double> points;
     /* Gear Changing Constants*/
     private  int[] gearUp = {9000, 8000, 8000, 8000, 8000, 0};
     private  int[] gearDown = {0, 2500, 3000, 3000, 3500, 3500};
-    private float x,z,b = 0.0f;
+    private int steeringRawInput, accelerationRawInput = 0;
+    private boolean gasPressed, brakePressed = false;
     private float smoothedSteering = 0.0f;
-    //private float currentFrameTimeStamp = (float)System.nanoTime()/1000.0f;
-    //private float lastFrameTimeStamp =  (float)System.nanoTime()/1000.0f;
-    //private float frameTime = 1.0f;
+    private RacingLine racingLine;
     
     Action toReturn;
-
+    boolean firstLoop;
+    double roadWidth = 0.0f;
+    int racingLineIndex = 0;
+    
+    Visualisation visualisation;
+    
     public padDriver() {
+
+        firstLoop = true;
+        
+        visualisation = new Visualisation();
+        
         this.pulse = false;
         
         toReturn = new Action();
@@ -51,16 +62,43 @@ public class padDriver extends Controller {
             angles[18 - i] = 20 - (i - 5) * 5;
         }
         angles[9] = 0;
+        
+        
+        points = new ArrayList<Point2D.Double>();
+
+        System.out.println(""
+                + "track -90,track -75,track -60,"
+                + "track -45,track -30,track -20,"
+                + "track -15,track -10,track -5,"
+                + "track 0,"
+                + "track 5,track 10,track 15,"
+                + "track 20,track 30,track 45,"
+                + "track 60,track 75,track 90,"
+                + "trackPosition,"
+                + "speed,"
+                + "distanceFromStartLine,"
+                + "angle,"
+                + "input steering,"
+                + "steering,"
+                + "input acceleration,"
+                + "gas,"
+                + "brake,"
+                + "gear");
+
     }
     
     
     @Override
     public Action control(SensorModel sensors) {
         
-        //currentFrameTimeStamp = (float)System.nanoTime()/1000.0f;
-        //frameTime = currentFrameTimeStamp - lastFrameTimeStamp;
-        //lastFrameTimeStamp = currentFrameTimeStamp;
         
+        
+        if(firstLoop){
+            double[] edges = sensors.getTrackEdgeSensors();
+            
+            roadWidth = edges[0] + edges[edges.length-1];
+            firstLoop = false;
+        }
         
         pad.poll();
         net.java.games.input.EventQueue queue = pad.getEventQueue();
@@ -70,113 +108,335 @@ public class padDriver extends Controller {
             String id = event.getComponent().getIdentifier().toString();
             float value = event.getValue(); 
             switch(id){
-                case "x":
-                    x = value;
+                case "pov":
+                    if (value > 0.75f || (value < 0.25f && value > 0.0f)){
+                        steeringRawInput = 1;
+                    }
+                    else if (value > 0.25f && value < 0.75f){
+                        steeringRawInput = -1;
+                    }
+                    else{
+                        steeringRawInput = 0;
+                    }
                 break;
 
-                case "z":
-                    z = value;
+                case "5":
+                    gasPressed = (value > 0.0f);
                 break;
 
-                case "0":
-                    b = value;
+                case "4":
+                    brakePressed = (value > 0.0f);
                 break;
             }
         }
 
+        if (gasPressed == brakePressed){
+            accelerationRawInput = 0;
+        }
+        else if (gasPressed){
+            accelerationRawInput = 1;
+        }
+        else if (brakePressed){
+            accelerationRawInput = -1;
+        }
+        
+        toReturn.gear = getGear(sensors, accelerationRawInput);
+        
+        switch (accelerationRawInput){
+            case(0):
+                toReturn.accelerate = 0.0f;
+                toReturn.brake = 0.0f;
+                break;
+            case(1):
+                if (toReturn.gear > 0){
+                    toReturn.accelerate += 0.1f;
+                    toReturn.brake = 0.0f;
+                }
+                else if (toReturn.gear < 0){
+                    toReturn.accelerate = 0f;
+                    toReturn.brake += 0.1f; 
+                }
+                break;
+            case(-1):
+                if (toReturn.gear > 0){
+                    toReturn.accelerate = 0.0f;
+                    toReturn.brake += 0.1f;
+                }
+                else if (toReturn.gear < 0){
+                    toReturn.accelerate += 0.1f;
+                    toReturn.brake = 0.0f; 
+                }
+                break;
+        }
         
         
-        if (x > 0.3f ){
-            toReturn.steering = -1.0f * ((0.6f * x * x) + 0.7f * x - 0.20f) * (x/2.0f + 0.5f);
+        
+        switch (steeringRawInput){
+            case(0):
+                toReturn.steering = 0.0f;
+                break;
+            case(1):
+                toReturn.steering += 0.05f;
+                break;
+            case(-1):
+                toReturn.steering -= 0.05f;
+                break;
         }
-        if (x < -0.3f){
-            float invValue = -x;
-            toReturn.steering = 1.0f * ((0.6f * invValue * invValue) + 0.7f * invValue - 0.20f) * (invValue/2.0f + 0.5f);
+
+        double[] trackEdge = sensors.getTrackEdgeSensors();
+        
+        
+        points.clear();
+
+        //computing x,y points
+        double radians;
+        for (int i = 0; i < trackEdge.length; i++) {
+            radians = Math.toRadians(angles[i]);
+            points.add(new Point2D.Double(trackEdge[i] * Math.sin(radians), trackEdge[i] * Math.cos(radians)));
         }
-        if (Math.abs(x) < 0.3f){
-            toReturn.steering = 0.0f;
-        }
+        
+        
+        
+        //computing angles between points
+        ArrayList<Double> borderAngles = new ArrayList<>();
+        borderAngles.add(new Double(Math.PI));
+        
+        for (int i = 1; i < points.size()-1; i++) {
+            double abcAngle = 
+                    Math.atan2(points.get(i+1).y - points.get(i).y, points.get(i+1).x - points.get(i).x)
+                    - Math.atan2(points.get(i-1).y - points.get(i).y, points.get(i-1).x - points.get(i).x);
             
+            borderAngles.add(Math.abs(abcAngle));    
+        }
         
-        if(toReturn.steering == 0.0f){
-            smoothedSteering += (toReturn.steering - smoothedSteering) * 20.0f/60.0f; 
-        }
-        else{
-            smoothedSteering += (toReturn.steering - smoothedSteering) * 3.0f/60.0f; 
-        }
-        toReturn.steering = smoothedSteering / 3.0f; 
-                
-        float brakeRaw = 0.0f;
+        borderAngles.add(new Double(Math.PI));
+
+        //trying to realize, which point belongs to which band
+        ArrayList<Point2D.Double> leftPoints = new ArrayList<>();
+        ArrayList<Point2D.Double> rightPoints = new ArrayList<>();
         
-        if (z < -0.25f){
-            toReturn.accelerate = -z;
-        }
-        if (z > 0.25f){
-            brakeRaw = z;
-            if (pulse){
-                toReturn.brake = z;
-                pulse = false;
+        double angleLimit = 3*Math.PI/4.0f;
+        
+        for (int i = 0; i < points.size(); i++) {
+            if(trackEdge[i] < 199.9f
+                    && (i == 0 || Point2D.distance(points.get(i).x, points.get(i).y, points.get(i-1).x, points.get(i-1).y) <= roadWidth * 1.5f)
+                    //&& (i == 0 || borderAngles.get(i-1) > angleLimit)
+            ){
+                leftPoints.add(points.get(i));
             }
             else{
-                toReturn.brake = 0.0f;
-                pulse = true;
+                break;
+            }
+        }
+        
+        for (int i = points.size()-1; i >= leftPoints.size(); i--) {
+            if (trackEdge[i] < 199.9f 
+                    && (i == points.size()-1 || Point2D.distance(points.get(i).x, points.get(i).y, points.get(i+1).x, points.get(i+1).y) <= roadWidth)
+                   // && (i == points.size()-1 || borderAngles.get(i+1) > angleLimit)
+            ){
+                rightPoints.add(points.get(i));
+                if (i >= points.size() && borderAngles.get(i+1) > angleLimit){
+                    leftPoints.remove(leftPoints.size()-1);
+                }
+            }
+            else{
+                break;
+            }
+        }
+        
+        
+        double leftLength = 0.0f;
+        double rightLength = 0.0f;
+        
+        for (int i = 1; i < leftPoints.size(); i++) {
+            leftLength += Point2D.distance(leftPoints.get(i).x, leftPoints.get(i).y, leftPoints.get(i-1).x, leftPoints.get(i-1).y);
+        }
+        
+        for (int i = 1; i < rightPoints.size(); i++) {
+            rightLength += Point2D.distance(rightPoints.get(i).x, rightPoints.get(i).y, rightPoints.get(i-1).x, rightPoints.get(i-1).y);
+        }
+        
+        //extending points
+        boolean left = leftLength > rightLength;
+        //List<Point2D.Double> longerSet = rightPoints;//(leftLength > rightLength ? leftPoints : rightPoints);
+        ArrayList<Point2D.Double> estimatedSet = new ArrayList<>();
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        //estimating right side
+        if(left){
+            
+            ArrayList<Point2D.Double> newLeftPoints = new ArrayList<>();
+            //increasing resolution
+            for (int i = 1; i < leftPoints.size(); i++) {
+                
+                newLeftPoints.add(leftPoints.get(i-1));
+                
+                double dist = Point2D.distance(leftPoints.get(i).x, leftPoints.get(i).y, leftPoints.get(i-1).x, leftPoints.get(i-1).y);
+                int intDist = new Double(dist).intValue();
+                double xShift = (leftPoints.get(i).x - leftPoints.get(i-1).x) / (double)intDist;
+                double yShift = (leftPoints.get(i).y - leftPoints.get(i-1).y) / (double)intDist;
+                for (int j = 1; j < intDist; j++) {
+                    newLeftPoints.add(new Point2D.Double(leftPoints.get(i-1).x + xShift * j, leftPoints.get(i-1).y + yShift * j));
+                }
+            }
+            newLeftPoints.add(leftPoints.get(leftPoints.size()-1));
+            leftPoints = newLeftPoints;
+            
+            if(leftPoints.size() >= 2){
+                double firstPointAngle = -Math.atan2(leftPoints.get(1).y - leftPoints.get(0).y, leftPoints.get(1).x - leftPoints.get(0).x);
+                Point2D.Double firstPoint = new Point2D.Double();
+                firstPoint.x = -roadWidth * Math.sin(firstPointAngle) + leftPoints.get(0).x;
+                firstPoint.y = -roadWidth * Math.cos(firstPointAngle) + leftPoints.get(0).y;
+
+                estimatedSet.add(firstPoint);
+            }
+            
+            for (int i = 1; i < leftPoints.size()-1; i++) {
+
+                Point2D.Double oppositePoint = new Point2D.Double();
+
+                double bisectorAngle;
+                double ab = Math.atan2(leftPoints.get(i+1).y - leftPoints.get(i).y, leftPoints.get(i+1).x - leftPoints.get(i).x);
+                double bc = Math.atan2(leftPoints.get(i).y - leftPoints.get(i-1).y, leftPoints.get(i).x - leftPoints.get(i-1).x);
+                bisectorAngle = (ab + bc) / 2.0f;
+                bisectorAngle = -bisectorAngle;
+
+                oppositePoint.x = -roadWidth * Math.sin(bisectorAngle) + leftPoints.get(i).x;
+                oppositePoint.y = -roadWidth * Math.cos(bisectorAngle) + leftPoints.get(i).y;
+                
+                estimatedSet.add(oppositePoint);
+            }
+            
+            if(leftPoints.size() >= 2){
+                double lastPointAngle = -Math.atan2(leftPoints.get(leftPoints.size()-1).y - leftPoints.get(leftPoints.size()-2).y,
+                        leftPoints.get(leftPoints.size()-1).x - leftPoints.get(leftPoints.size()-2).x);
+                Point2D.Double lastPoint = new Point2D.Double();
+                lastPoint.x = -roadWidth * Math.sin(lastPointAngle) + leftPoints.get(leftPoints.size()-1).x;
+                lastPoint.y = -roadWidth * Math.cos(lastPointAngle) + leftPoints.get(leftPoints.size()-1).y;
+
+                estimatedSet.add(lastPoint);
+            }
+            
+            rightPoints = estimatedSet;
+        }
+        
+        
+   
+        
+        
+        
+        //estimating left side
+        else{
+            
+            
+            ArrayList<Point2D.Double> newRightPoints = new ArrayList<>();
+            //increasing resolution
+            for (int i = 1; i < rightPoints.size(); i++) {
+                
+                newRightPoints.add(rightPoints.get(i-1));
+                
+                double dist = Point2D.distance(rightPoints.get(i).x, rightPoints.get(i).y, rightPoints.get(i-1).x, rightPoints.get(i-1).y);
+                int intDist = new Double(dist).intValue();
+                double xShift = (rightPoints.get(i).x - rightPoints.get(i-1).x) / (double)intDist;
+                double yShift = (rightPoints.get(i).y - rightPoints.get(i-1).y) / (double)intDist;
+                
+                for (int j = 1; j < intDist; j++) {
+                    newRightPoints.add(new Point2D.Double(rightPoints.get(i-1).x + xShift * (double)j, rightPoints.get(i-1).y + yShift * (double)j));
+                }
+            }
+            newRightPoints.add(rightPoints.get(rightPoints.size()-1));
+            rightPoints = newRightPoints;
+            
+
+            
+            if(rightPoints.size() >= 2){
+                double firstPointAngle = -Math.atan2(rightPoints.get(1).y - rightPoints.get(0).y,
+                    rightPoints.get(1).x - rightPoints.get(0).x);
+                Point2D.Double firstPoint = new Point2D.Double();
+                firstPoint.x = roadWidth * Math.sin(firstPointAngle) + rightPoints.get(0).x;
+                firstPoint.y = roadWidth * Math.cos(firstPointAngle) + rightPoints.get(0).y;
+
+                estimatedSet.add(firstPoint);
+            }
+            
+            
+            for (int i = 1; i < rightPoints.size()-1; i++) {
+            
+                Point2D.Double oppositePoint = new Point2D.Double();
+            
+                double bisectorAngle;
+            
+                double ab = Math.atan2(rightPoints.get(i+1).y - rightPoints.get(i).y, rightPoints.get(i+1).x - rightPoints.get(i).x);
+                double bc = Math.atan2(rightPoints.get(i).y - rightPoints.get(i-1).y, rightPoints.get(i).x - rightPoints.get(i-1).x);
+                bisectorAngle = (ab + bc) / 2.0f;
+                bisectorAngle = -bisectorAngle;
+
+                oppositePoint.x = roadWidth * Math.sin(bisectorAngle) + rightPoints.get(i).x;
+                oppositePoint.y = roadWidth * Math.cos(bisectorAngle) + rightPoints.get(i).y;
+
+                estimatedSet.add(oppositePoint);
+                
+            }
+            
+            if(rightPoints.size() >= 2){
+                double lastPointAngle = -Math.atan2(rightPoints.get(rightPoints.size()-1).y - rightPoints.get(rightPoints.size()-2).y,
+                    rightPoints.get(rightPoints.size()-1).x - rightPoints.get(rightPoints.size()-2).x);
+                Point2D.Double lastPoint = new Point2D.Double();
+                lastPoint.x = roadWidth * Math.sin(lastPointAngle) + rightPoints.get(rightPoints.size()-1).x;
+                lastPoint.y = roadWidth * Math.cos(lastPointAngle) + rightPoints.get(rightPoints.size()-1).y;
+
+                estimatedSet.add(lastPoint);
             }
 
+            leftPoints = estimatedSet;
+            
         }
-
-
-        if (Math.abs(z) < 0.25f){
-            brakeRaw = 0.0f;
-            toReturn.accelerate = 0.0f;
-            toReturn.brake = 0.0f;
-        }
-  
         
-        if (b > 0.1f){
-            toReturn.accelerate = -1.0f;
-        }
+        double distanceFromStartLine = sensors.getDistanceFromStartLine();
 
+        ArrayList<Point2D.Double> racingLinePoints = new ArrayList<>();
+        double distanceFromCar = 0.0f;
         
-        toReturn.gear = getGear(sensors);
-
-        // Set the input
-        // Track [0,200] (m)
-        // Vector of 19 range finder sensors: each sensors returns the
-        // distance between the track edge and the car within a range
-        // of 200 meters. When noisy option is enabled (see Section
-        // 7), sensors are affected by i.i.d. normal noises with a
-        // standard deviation equal to the 10% of sensors range. By
-        // default, the sensors sample the space in front of the car every
-        // 10 degrees, spanning clockwise from -90 degrees up to
-        // +90 degrees with respect to the car axis. However, the con-
-        // figuration of the range finder sensors (i.e., the angle w.r.t.
-        // to the car axis) can be set by the client once during initialization,
-        // i.e., before the beginning of each race. When the
-        // car is outside of the track (i.e., pos is less than -1 or greater
-        // than 1), the returned values are not reliable (typically -1 is
-        // returned).
-        double[] trackEdge = sensors.getTrackEdgeSensors();
-
-
-
-        //for (int i = 0; i < angles.length; i++) {
-        //    fis.setVariable("track" + i, trackEdge[i]);
-        //}
-
-        double[] curvePredictions = new double[trackEdge.length/2];
-        for (int i = 10; i < trackEdge.length; i++) {
-            double curvePrediction = Math.log10(trackEdge[i]/trackEdge[18-i]);
-            curvePredictions[i-10] = curvePrediction;
+        double previousCenterOfPointX = 0.0f;
+        double previousCenterOfPointY = 0.0f;
+        
+        if(leftPoints.size() == rightPoints.size()){
+            
+            if (!leftPoints.isEmpty()){
+                previousCenterOfPointX = (rightPoints.get(0).x + leftPoints.get(0).x) / 2.0f;
+                previousCenterOfPointY = (rightPoints.get(0).y + leftPoints.get(0).y) / 2.0f;
+            }
+            for (int i = 0; i < leftPoints.size(); i++) {
+                
+                double centerOfPointX = (rightPoints.get(i).x + leftPoints.get(i).x) / 2.0f;
+                double centerOfPointY = (rightPoints.get(i).y + leftPoints.get(i).y) / 2.0f;
+                
+                distanceFromCar += Point2D.distance(previousCenterOfPointX, previousCenterOfPointY, centerOfPointX, centerOfPointY);
+                
+                previousCenterOfPointX = centerOfPointX;
+                previousCenterOfPointY = centerOfPointY;
+                
+                double racingLinePosition = racingLine.GetFirstPointAfter(distanceFromStartLine + distanceFromCar);
+                racingLinePoints.add(
+                        new Point2D.Double(
+                            leftPoints.get(i).x + (rightPoints.get(i).x - leftPoints.get(i).x) * (1.0f-((racingLinePosition+1.0f)/2.0f)),
+                            leftPoints.get(i).y + (rightPoints.get(i).y - leftPoints.get(i).y) * (1.0f-((racingLinePosition+1.0f)/2.0f))));
+            }
         }
-
-        // Track pos (−∞,+∞)
-        // Distance between the car and the track axis. The value is
-        // normalized w.r.t to the track width: it is 0 when car is on
-        // the axis, -1 when the car is on the right edge of the track
-        // and +1 when it is on the left edge of the car. Values greater
-        // than 1 or smaller than -1 mean that the car is outside of
-        // the track.
-
+        else{
+            System.err.println("nierowne krawedzie!");
+        }
+        
+        visualisation.Redraw(leftPoints, rightPoints, racingLinePoints);
+        
         double trackPosition = sensors.getTrackPosition();
         //fis.setVariable("trackPos", trackPosition);
 
@@ -185,20 +445,11 @@ public class padDriver extends Controller {
         double speed = sensors.getSpeed();
         //fis.setVariable("speed", speed);
 
-        double distanceRaced = sensors.getDistanceRaced();
-        //fis.setVariable("distanceRaced", distanceRaced);
 
-        // Opponents [0,200] (m)
-        // Vector of 36 opponent sensors: each sensor covers a span
-        // of 10 degrees within a range of 200 meters and returns the
-        // distance of the closest opponent in the covered area. When
-        // noisy option is enabled (see Section 7), sensors are affected
-        // by i.i.d. normal noises with a standard deviation equal to
-        // the 2% of sensors range. The 36 sensors cover all the space
-        // around the car, spanning clockwise from -180 degrees up to
-        // +180 degrees with respect to the car axis.
-        double[] opponents = sensors.getOpponentSensors();
-        //for (int i = 0; i < opponents.length; i++) {
+//        double[] opponents = sensors.getOpponentSensors();
+        
+
+//for (int i = 0; i < opponents.length; i++) {
         //    fis.setVariable("opponent" + i, opponents[i]);
         //}
 
@@ -211,9 +462,6 @@ public class padDriver extends Controller {
 
         //fis.evaluate();
 
-        // set the output
-        // Steering value: -1 and +1 means respectively full right and
-        // left, that corresponds to an angle of 0.366519 rad. Range [-1,1]
         //Variable steering = fis.getVariable("steering");
         //Virtual gas pedal (0 means no gas, 1 full gas). Range [0,1] 
         //Variable accelerate = fis.getVariable("accelerate");
@@ -226,11 +474,6 @@ public class padDriver extends Controller {
         //toReturn.accelerate = accelerate.getValue();
         //toReturn.brake = brake.getValue();
 
-
-        toReturn.gear = getGear(sensors);
-
-
-
         StringBuilder strBuilder = new StringBuilder();
         
         for (int i = 0; i < angles.length; i++) {
@@ -238,36 +481,30 @@ public class padDriver extends Controller {
             strBuilder.append(",");
         }
         
-        for (int i = 0; i < curvePredictions.length; i++) {
-            strBuilder.append(curvePredictions[i]);
-            strBuilder.append(",");
-        }
-        
         strBuilder.append(trackPosition);
         strBuilder.append(",");
         strBuilder.append(speed);
         strBuilder.append(",");
-        strBuilder.append(distanceRaced);
+        strBuilder.append(distanceFromStartLine);
         strBuilder.append(",");
-       
-        for (int i = 0; i < opponents.length; i++) {
-            strBuilder.append(opponents[i]);
-            strBuilder.append(",");
-        }
-       
         strBuilder.append(angle);
+        strBuilder.append(",");
+        
+        strBuilder.append(steeringRawInput);
         strBuilder.append(",");
         strBuilder.append(toReturn.steering);
         strBuilder.append(",");
+        strBuilder.append(accelerationRawInput);
+        strBuilder.append(",");
         strBuilder.append(toReturn.accelerate);
         strBuilder.append(",");
-        //strBuilder.append(toReturn.brake);
-        strBuilder.append(brakeRaw);
+        strBuilder.append(toReturn.brake);
         strBuilder.append(",");
         strBuilder.append(toReturn.gear);
         strBuilder.append(",");
 
         System.out.println(strBuilder.toString());
+
         return toReturn;
     }
     
@@ -287,14 +524,34 @@ public class padDriver extends Controller {
         return angles;
     }
     
-    private int getGear(SensorModel sensors) {
+    private int getGear(SensorModel sensors, int accelerate) {
         int gear = sensors.getGear();
         double rpm = sensors.getRPM();
-
-        // if gear is 0 (N) or -1 (R) just return 1 
-        if (gear < 1) {
+        double speed = sensors.getSpeed();
+        
+        // jeżeli się cofam
+        if (speed <= -1.0f){
+            return -1;
+        }
+        
+        //jezeli stoje w miejscu
+        if (speed > -1.0f && speed <= 1.0f){
+            if(accelerate == 0 ){
+                return 0;
+            }
+            else if(accelerate > 0){
+                return 1;
+            }
+            else if(accelerate < 0){
+                return -1;
+            }
+        }
+        
+        // jezeli jadę do przodu
+        if(speed > 1.0f && gear < 1){
             return 1;
         }
+
         // check if the RPM value of car is greater than the one suggested 
         // to shift up the gear from the current one     
         if (gear < 6 && rpm >= gearUp[gear - 1]) {
@@ -313,6 +570,11 @@ public class padDriver extends Controller {
     public void setGearsPreferences(GearPreference gp){
         gearUp = convertIntegers(gp.gearUps);
         gearDown = convertIntegers(gp.gearDowns);
+    }
+    
+    @Override
+    public void setRacingLine(RacingLine rl){
+        racingLine = rl;
     }
     
     private int[] convertIntegers(List<Integer> integers)

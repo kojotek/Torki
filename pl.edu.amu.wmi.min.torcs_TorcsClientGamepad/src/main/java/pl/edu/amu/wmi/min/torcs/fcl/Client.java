@@ -53,7 +53,8 @@ public class Client {
     private static Stage stage;
     private static String trackName;
     private static String gearsFile;
-
+    private static String racingLineFile;
+    
     public static void main(String[] args) {
         
         parseParameters(args);
@@ -71,7 +72,8 @@ public class Client {
                     + "<maxSteps:N>\t is used to set the max number of steps for each episode (0 is default value, that means unlimited number of steps)\n"
                     + "<stage:N>\t is used to set the current stage: 0 is WARMUP, 1 is QUALIFYING, 2 is RACE, others value means UNKNOWN (default is UNKNOWN)\n"
                     + "<trackName:name>\t is used to set the name of current track (optional)"
-                    + "<gearPreferences:file>\t is used to specify file with gears preferences (optional)");
+                    + "<gearPreferences:file>\t is used to specify file with gears preferences (optional)"
+                    + "<racingLine:file>\t is used to specify file with racing line");
             return;
         }
 
@@ -89,6 +91,14 @@ public class Client {
         try {
             gPref.Load(gearsFile);
             driver.setGearsPreferences(gPref);
+        } catch (IOException ex) {
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        RacingLine rLine = new RacingLine();
+        try {
+            rLine.Load(racingLineFile);
+            driver.setRacingLine(rLine);
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -182,6 +192,8 @@ public class Client {
         stage = Stage.UNKNOWN;
         trackName = "unknown";
         gearsFile = "";
+        racingLineFile = "";
+        
         
         for (int i = 1; i < args.length; i++) {
             StringTokenizer st = new StringTokenizer(args[i], ":");
@@ -208,6 +220,9 @@ public class Client {
             }
             if (entity.equals("id")) {
                 clientId = value;
+            }
+            if (entity.equals("racingLine")) {
+                racingLineFile = value;
             }
             if (entity.equals("gearPreferences")) {
                 gearsFile = value;
