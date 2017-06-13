@@ -44,14 +44,14 @@ public class RacingLine {
             while(iterator < distanceRaced.length-1 && distanceRaced[iterator] < position){
                 iterator++;
             }
-            return lineRelativePosition[iterator];
+            return Math.min(Math.max(lineRelativePosition[iterator], -0.7f), 0.7f);
         }
         else{
             while(iterator > 0 && distanceRaced[iterator-1] > position){
                 //System.err.println(iterator + ": " + distanceRaced[iterator-1] + " > " + position);
                 iterator--;
             }
-            return lineRelativePosition[iterator];
+            return Math.min(Math.max(lineRelativePosition[iterator], -0.7f), 0.7f);
         }
     }
     

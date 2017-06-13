@@ -77,13 +77,20 @@ public class Client {
             return;
         }
 
-        FIS fis = FIS.load(args[0], true);
-        if (fis == null) {
+        FIS steeringFis = FIS.load(args[0], true);
+        if (steeringFis == null) {
+            System.err.println("Cannot load FCL driver file: '" + args[0] + "'");
+            return;
+        }
+        
+        FIS accelFis = FIS.load(args[1], true);
+        if (accelFis == null) {
             System.err.println("Cannot load FCL driver file: '" + args[0] + "'");
             return;
         }
 
-        Controller driver = new padDriver();
+        padDriver driver = new padDriver();
+        driver.setFIS(steeringFis, accelFis);
         driver.setStage(stage);
         driver.setTrackName(trackName);
         
@@ -195,7 +202,7 @@ public class Client {
         racingLineFile = "";
         
         
-        for (int i = 1; i < args.length; i++) {
+        for (int i = 2; i < args.length; i++) {
             StringTokenizer st = new StringTokenizer(args[i], ":");
             String entity = st.nextToken();
             String value = st.nextToken();

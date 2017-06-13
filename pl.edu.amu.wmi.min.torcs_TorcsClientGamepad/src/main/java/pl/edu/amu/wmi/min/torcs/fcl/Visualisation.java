@@ -6,10 +6,12 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.scene.shape.Circle;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
@@ -24,7 +26,8 @@ public class Visualisation {
         public List<Point2D.Double> rightRoadPoints;
         public List<Point2D.Double> estimatedRoadPoints;
         private List<Point2D.Double> racingLine;
-
+        int circleSize = 8;
+        
         DrawingComponent() {
             this.center = new Point2D.Double(640.0f/2.0f, 400.0f);
             leftRoadPoints = new ArrayList<Point2D.Double>();
@@ -34,6 +37,7 @@ public class Visualisation {
             carWidth = 2.0f;
             carHeight = 4.6f;
             scaleFactor = 5.0f;
+            
         }
         
         @Override
@@ -56,6 +60,10 @@ public class Visualisation {
                         -leftRoadPoints.get(i-1).y *scaleFactor + center.y);
                 g2.setColor(Color.blue);
                 g2.draw(line);
+                
+                g2.fillOval(new Double(leftRoadPoints.get(i).x * scaleFactor + center.x).intValue() - (circleSize/2),
+                        new Double(-leftRoadPoints.get(i).y * scaleFactor + center.y).intValue() - (circleSize/2),
+                        circleSize, circleSize);
             }
             
             for (int i = 1; i < rightRoadPoints.size(); i++) {
@@ -66,6 +74,10 @@ public class Visualisation {
                         -rightRoadPoints.get(i-1).y *scaleFactor + center.y);
                 g2.setColor(Color.red);
                 g2.draw(line);
+                
+                g2.fillOval(new Double(rightRoadPoints.get(i).x * scaleFactor + center.x).intValue() - (circleSize/2),
+                        new Double(-rightRoadPoints.get(i).y * scaleFactor + center.y).intValue() - (circleSize/2),
+                        circleSize, circleSize);
             }
             
             for (int i = 1; i < racingLine.size(); i++) {
@@ -76,6 +88,11 @@ public class Visualisation {
                         -racingLine.get(i-1).y *scaleFactor + center.y);
                 g2.setColor(Color.magenta);
                 g2.draw(line);
+                
+                
+                g2.fillOval(new Double(racingLine.get(i).x * scaleFactor + center.x).intValue() - (circleSize/2),
+                        new Double(-racingLine.get(i).y * scaleFactor + center.y).intValue() - (circleSize/2),
+                        circleSize, circleSize);
             }
         }
     }
