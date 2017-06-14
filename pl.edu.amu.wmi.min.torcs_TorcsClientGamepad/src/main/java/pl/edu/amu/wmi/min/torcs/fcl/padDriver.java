@@ -13,8 +13,8 @@ import net.sourceforge.jFuzzyLogic.rule.Variable;
 
 public class padDriver extends Controller {
 
-    boolean useFuzzyDriverSteering = false;
-    boolean useFuzzyDriverAcceleration = false;
+    boolean useFuzzyDriverSteering = true;
+    boolean useFuzzyDriverAcceleration = true;
     boolean useBot = false;
     Set<String> variablesInUseSteering;
     Set<String> variablesInUseAccel; 
@@ -792,8 +792,10 @@ public class padDriver extends Controller {
             accelFis.evaluate();
             double rawAccel = accelFis.getVariable("inputAcceleration").getValue();
 
+            accelerationRawInput = (int) Math.round(rawAccel);
+            
             if(rawAccel > 0.33f){
-                accelerationRawInput = 1;
+                accelerationRawInput = 2;
             } else if (rawAccel < -0.33f){
                 accelerationRawInput = -1;
             } else {
@@ -983,7 +985,7 @@ public class padDriver extends Controller {
 
 
 
-        if (accelerationRawInput == 1){
+        if (accelerationRawInput == 2){
             strBuilder.append("Forward");
         } 
         else if (accelerationRawInput == -1){
