@@ -15,6 +15,7 @@ public class padDriver extends Controller {
 
     boolean useFuzzyDriverSteering = false;
     boolean useFuzzyDriverAcceleration = false;
+    boolean useBot = false;
     Set<String> variablesInUseSteering;
     Set<String> variablesInUseAccel; 
     boolean pulse;
@@ -30,6 +31,7 @@ public class padDriver extends Controller {
     
     FIS steeringFis;
     FIS accelFis;
+    FIS gearFis;
     
     Action toReturn;
     boolean firstLoop;
@@ -92,16 +94,23 @@ public class padDriver extends Controller {
                 + "track10,track11,track12,"
                 + "track13,track14,track15,"
                 + "track16,track17,track18,"
+                + "racingLine5,racingLine10,"
+                + "racingLine15,racingLine20,"
+                + "racingLine25,racingLine30,"
                 + "trackPosition,"
                 + "maxTrackEdge,"
                 + "speed,"
                 + "sideSpeed,"
+                + "rpm,"
+                + "gear,"
                 + "distanceFromStartLine,"
                 + "angle,"
                 + "distanceFromRacingLine,"
-                + "racingLine15,"
                 + "outOfTrack,"
                 + "meanCurve,"
+                + "trackBBoxWidth,"
+                + "trackBBoxHeigth,"
+                + "trackVisibility,"
                 + "inputSteering,"
 //                + "steering,"
                 + "inputAcceleration,"
@@ -124,6 +133,7 @@ public class padDriver extends Controller {
             roadWidth = edges[0] + edges[edges.length-1];
             firstLoop = false;
         }
+        
         
         pad.poll();
         net.java.games.input.EventQueue queue = pad.getEventQueue();
@@ -159,7 +169,7 @@ public class padDriver extends Controller {
             accelerationRawInput = 0;
         }
         else if (gasPressed){
-            accelerationRawInput = 1;
+            accelerationRawInput = 2;
         }
         else if (brakePressed){
             accelerationRawInput = -1;
@@ -413,19 +423,31 @@ public class padDriver extends Controller {
         double previousCenterOfPointY = 0.0f;
         
         double distanceFromRacingLine = sensors.getTrackPosition() - racingLine.GetFirstPointAfter(distanceFromStartLine);
+        double actualDistanceFromRacingLine = distanceFromRacingLine * (roadWidth/2.0f);
+        
+        double radAngle = sensors.getAngleToTrackAxis();
+        double distanceToTrackCenter = sensors.getTrackPosition() * (roadWidth/2.0f);
+        
+        centerLinePoints.add(new Point2D.Double(distanceToTrackCenter * Math.cos(radAngle), distanceToTrackCenter * Math.sin(radAngle)));
+        racingLinePoints.add(new Point2D.Double(actualDistanceFromRacingLine * Math.cos(radAngle), actualDistanceFromRacingLine * Math.sin(radAngle)));
         
         if(leftPoints.size() == rightPoints.size()){
             
+            /*
             if (!leftPoints.isEmpty()){
                 previousCenterOfPointX = (rightPoints.get(0).x + leftPoints.get(0).x) / 2.0f;
                 previousCenterOfPointY = (rightPoints.get(0).y + leftPoints.get(0).y) / 2.0f;
             }
+            */
+            previousCenterOfPointX = centerLinePoints.get(0).x;
+            previousCenterOfPointY = centerLinePoints.get(0).y;
+            
             for (int i = 0; i < leftPoints.size(); i++) {
                 
                 double centerOfPointX = (rightPoints.get(i).x + leftPoints.get(i).x) / 2.0f;
                 double centerOfPointY = (rightPoints.get(i).y + leftPoints.get(i).y) / 2.0f;
                 
-                if(rightPoints.get(i).y < 0.0f || leftPoints.get(i).y < 0.0f){
+                if(rightPoints.get(i).y <= 2.0f || leftPoints.get(i).y <= 2.0f){
                     continue;
                 }
                 
@@ -442,12 +464,45 @@ public class padDriver extends Controller {
                             leftPoints.get(i).x + (rightPoints.get(i).x - leftPoints.get(i).x) * (1.0f-((racingLinePosition+1.0f)/2.0f)),
                             leftPoints.get(i).y + (rightPoints.get(i).y - leftPoints.get(i).y) * (1.0f-((racingLinePosition+1.0f)/2.0f))));
             }
+            
+            //increasing resolution of racing line
+            ArrayList<Point2D.Double> newRacingLinePoints = new ArrayList<>();
+            double stepSize = 2.0f;
+            double lastPointX = racingLinePoints.get(0).x;
+            double lastPointY = racingLinePoints.get(0).y;
+            
+            newRacingLinePoints.add(racingLinePoints.get(0));
+            
+            for (int i = 1; i < racingLinePoints.size(); i++) {
+                
+                //newRacingLinePoints.add(racingLinePoints.get(i-1));
+                
+                double dist = Point2D.distance(racingLinePoints.get(i).x, racingLinePoints.get(i).y, lastPointX, lastPointY);
+                
+                while (dist > stepSize){
+                    double xShift = stepSize * (racingLinePoints.get(i).x - lastPointX) / dist;
+                    double yShift = stepSize * (racingLinePoints.get(i).y - lastPointY) / dist;
+                    newRacingLinePoints.add(new Point2D.Double(lastPointX + xShift, lastPointY + yShift));
+                    
+                    lastPointX = lastPointX + xShift;
+                    lastPointY = lastPointY + yShift;
+                    
+                    dist = Point2D.distance(racingLinePoints.get(i).x, racingLinePoints.get(i).y, lastPointX, lastPointY);
+                }
+                
+            }
+            
+            if (!racingLinePoints.isEmpty()){
+                newRacingLinePoints.add(racingLinePoints.get(racingLinePoints.size()-1));
+                racingLinePoints = newRacingLinePoints;
+            }
+            
         }
         else{
             System.err.println("nierowne krawedzie!");
         }
         
-        
+        /*
         double[] distances = new double[] {10.0f, 20.0f, 30.0f, 40.0f, 50.0f};
         ArrayList<Double> racingPointsX = new ArrayList<>();
         
@@ -468,6 +523,7 @@ public class padDriver extends Controller {
                 }
             }
         }
+        */
         
         
         //mean of angles
@@ -498,11 +554,12 @@ public class padDriver extends Controller {
         
         double meanCurve = anglesChangeSum/centerLineLength;
         
+        /*
         double racingLine15 = 0.0f;
         if (racingPointsX.size() > 0){
             racingLine15 = racingPointsX.get(0);
         }
-        
+        */
 
         visualisation.Redraw(leftPoints, rightPoints, racingLinePoints);     
         
@@ -511,6 +568,115 @@ public class padDriver extends Controller {
         double speed = sensors.getSpeed();
         double sideSpeed = sensors.getLateralSpeed();
         double trackPosition = sensors.getTrackPosition();
+        int outOfTrack = trackEdge[0] < 0.1f ? 1 : 0;
+        
+        
+        
+        
+        
+        
+                /**********************************************/
+        //Here is place for temporary hacks           //
+        /**********************************************/
+        
+
+        int racingLineindex = 5 + new Double(Math.abs(speed)).intValue() / 25;
+        
+        if (Math.abs(sideSpeed) > 25.0f){
+            racingLineindex += (new Double(Math.abs(sideSpeed)).intValue() - 25) / 1;
+        }
+        
+        
+        while(racingLineindex >= racingLinePoints.size()){
+            racingLineindex--;
+        }
+        
+        
+        double refSteer = 0;
+        
+
+        if (racingLineindex >= 0){
+            refSteer = racingLinePoints.get(racingLineindex).x;
+        }
+
+        ArrayList<Double> racingLineX = new ArrayList<>();
+        
+        for (int i = 5; i < 31; i+=5) {
+            if (i < racingLinePoints.size() ){
+                racingLineX.add(racingLinePoints.get(i).x);
+            }
+            else if (racingLineX.size() >= 2){
+                racingLineX.add(racingLineX.get(racingLineX.size()-1) + (racingLineX.get(racingLineX.size()-1) - racingLineX.get(racingLineX.size()-2)));
+            }
+            else if (racingLineX.size() == 1){
+                racingLineX.add(racingLineX.get(racingLineX.size()-1));
+            }
+            else {
+                racingLineX.add(new Double(0.0f));
+            }
+
+        }
+        
+        if (useBot){
+            if(refSteer > 0.6f){
+                steeringRawInput = -1;
+            } 
+            else if (refSteer < -0.6f){
+                steeringRawInput = 1;
+            }
+            else{
+                steeringRawInput = 0;
+            }
+        }
+        
+        
+        double trackVisibility = racingLinePoints.size();
+
+        double biggestX = 0.0f;
+        double smallestX = 0.0f;
+        double trackBBoxHeight = 0.0f;
+        for (int i = 0; i < racingLinePoints.size(); i++) {
+            if (racingLinePoints.get(i).x > biggestX){
+                biggestX = racingLinePoints.get(i).x;
+            }
+            if (racingLinePoints.get(i).x < smallestX){
+                smallestX = racingLinePoints.get(i).x;
+            }
+            if (Math.abs(racingLinePoints.get(i).y) > trackBBoxHeight){
+                trackBBoxHeight = Math.abs(racingLinePoints.get(i).y);
+            }
+        }
+        
+        double trackBBoxWidth = biggestX - smallestX;
+        
+        if (trackBBoxWidth < 1){
+            trackBBoxWidth = 1.0f;
+        }
+        
+        double destinatedSpeed = 2800.0f/trackBBoxWidth - 100.0f/trackBBoxHeight;
+        
+        if (useBot){
+            if (speed > destinatedSpeed + 10.0f){
+                accelerationRawInput = -1;
+            }
+            else if (speed < destinatedSpeed - 10.0f){
+                accelerationRawInput = 2;
+            }
+            else{
+                accelerationRawInput = 1;
+            }
+        }
+
+        
+        /**********************************************/
+        //Here is place for temporary hacks           //
+        /**********************************************/
+        
+        
+        
+        
+        
+        
         
         if (useFuzzyDriverSteering){
             if (variablesInUseSteering.contains("angle")){
@@ -528,11 +694,23 @@ public class padDriver extends Controller {
             if (variablesInUseSteering.contains("maxTrackEdge")){
                 steeringFis.setVariable("maxTrackEdge", maxTrackEdge);
             }
-            if (variablesInUseSteering.contains("racingLine15")){
-                steeringFis.setVariable("racingLine15", racingLine15);
-            }
+            //if (variablesInUseSteering.contains("racingLine15")){
+            //    steeringFis.setVariable("racingLine15", racingLine15);
+            //}
             if (variablesInUseSteering.contains("meanCurve")){
                 steeringFis.setVariable("meanCurve", meanCurve);
+            }
+            if (variablesInUseSteering.contains("outOfTrack")){
+                steeringFis.setVariable("outOfTrack", outOfTrack);
+            }
+            if (variablesInUseSteering.contains("trackBBoxWidth")){
+                steeringFis.setVariable("trackBBoxWidth", trackBBoxWidth);
+            }
+            if (variablesInUseSteering.contains("trackBBoxHeight")){
+                steeringFis.setVariable("trackBBoxHeight", trackBBoxHeight);
+            }
+            if (variablesInUseSteering.contains("outOfTrack")){
+                steeringFis.setVariable("outOfTrack", outOfTrack);
             }
             if (variablesInUseSteering.contains("sideSpeed")){
                 steeringFis.setVariable("sideSpeed", sideSpeed);
@@ -540,6 +718,11 @@ public class padDriver extends Controller {
             for (int i = 0; i < trackEdge.length; i++) {
                 if (variablesInUseSteering.contains("track" + Integer.toString(i))){
                     steeringFis.setVariable("track" + Integer.toString(i), trackEdge[i]);
+                }
+            }
+            for (int i = 0; i < racingLineX.size(); i++) {
+                if (variablesInUseSteering.contains("racingLine" + Integer.toString((i+1)*5))){
+                    steeringFis.setVariable("racingLine" + Integer.toString((i+1)*5), racingLineX.get(i));
                 }
             }
 
@@ -573,21 +756,38 @@ public class padDriver extends Controller {
             if (variablesInUseAccel.contains("maxTrackEdge")){
                 accelFis.setVariable("maxTrackEdge", maxTrackEdge);
             }
-            if (variablesInUseAccel.contains("racingLine15")){
-                accelFis.setVariable("racingLine15", racingLine15);
-            }
+            //if (variablesInUseAccel.contains("racingLine15")){
+            //    accelFis.setVariable("racingLine15", racingLine15);
+            //}
             if (variablesInUseAccel.contains("meanCurve")){
                 accelFis.setVariable("meanCurve", meanCurve);
+            }
+            if (variablesInUseAccel.contains("outOfTrack")){
+                accelFis.setVariable("outOfTrack", outOfTrack);
+            }
+            if (variablesInUseAccel.contains("trackBBoxWidth")){
+                accelFis.setVariable("trackBBoxWidth", trackBBoxWidth);
+            }
+            if (variablesInUseAccel.contains("trackBBoxHeight")){
+                accelFis.setVariable("trackBBoxHeight", trackBBoxHeight);
+            }
+            if (variablesInUseAccel.contains("outOfTrack")){
+                accelFis.setVariable("outOfTrack", outOfTrack);
             }
             if (variablesInUseAccel.contains("sideSpeed")){
                 accelFis.setVariable("sideSpeed", sideSpeed);
             }
-
             for (int i = 0; i < trackEdge.length; i++) {
                 if (variablesInUseAccel.contains("track" + Integer.toString(i))){
                     accelFis.setVariable("track" + Integer.toString(i), trackEdge[i]);
                 }
             }
+            for (int i = 0; i < racingLineX.size(); i++) {
+                if (variablesInUseAccel.contains("racingLine" + Integer.toString((i+1)*5))){
+                    accelFis.setVariable("racingLine" + Integer.toString((i+1)*5), racingLineX.get(i));
+                }
+            }
+
             
             accelFis.evaluate();
             double rawAccel = accelFis.getVariable("inputAcceleration").getValue();
@@ -604,54 +804,8 @@ public class padDriver extends Controller {
         
         
         
-        /**********************************************/
-        //Here is place for temporary hacks           //
-        /**********************************************/
-        
 
-        int refValue = 0;
-        double refSteer = 0;
-        
-        /*
-        if (speed < 50.0f){
-            refValue = 0;
-        }
-        if (speed > 50.0f){
-            refValue = 1;
-        }
-        if (speed > 100.0f){
-            refValue = 2;
-        }
-        */
-        
-        refValue = 2;
-        while(refValue >= racingPointsX.size()){
-            refValue--;
-        }
-        
-        
-        
-        if (!racingPointsX.isEmpty()){
-            refSteer = racingPointsX.get(refValue);
-        }
-        
-        if(refSteer > 0.8f){
-            steeringRawInput = -1;
-        } 
-        else if (refSteer < -0.8f){
-            steeringRawInput = 1;
-        }
-        else{
-            steeringRawInput = 0;
-        }
-        
-        /**********************************************/
-        //Here is place for temporary hacks           //
-        /**********************************************/
-                    
 
-        
-        
         
         
         
@@ -662,6 +816,17 @@ public class padDriver extends Controller {
                 toReturn.brake = 0.0f;
                 break;
             case(1):
+                if (toReturn.gear > 0){
+                    toReturn.accelerate += 0.1f;
+                    toReturn.accelerate = Math.min(toReturn.accelerate, 0.5f);
+                    toReturn.brake = 0.0f;
+                }
+                else if (toReturn.gear < 0){
+                    toReturn.accelerate = 0f;
+                    toReturn.brake += 0.1f;
+                }
+                break;
+            case(2):
                 if (toReturn.gear > 0){
                     toReturn.accelerate += 0.1f;
                     toReturn.brake = 0.0f;
@@ -759,6 +924,10 @@ public class padDriver extends Controller {
             strBuilder.append(doubleFormatter.format(trackEdge[i]));
             strBuilder.append(",");
         }
+        for (int i = 0; i < racingLineX.size(); i++) {
+            strBuilder.append(doubleFormatter.format(racingLineX.get(i)));
+            strBuilder.append(",");
+        }
         
 
         strBuilder.append(doubleFormatter.format(trackPosition));
@@ -769,18 +938,30 @@ public class padDriver extends Controller {
         strBuilder.append(",");
         strBuilder.append(doubleFormatter.format(sideSpeed));
         strBuilder.append(",");
+        strBuilder.append(doubleFormatter.format(sensors.getRPM()));
+        strBuilder.append(",");
+        strBuilder.append(sensors.getGear());
+        strBuilder.append(",");
         strBuilder.append(doubleFormatter.format(distanceFromStartLine));
         strBuilder.append(",");
         strBuilder.append(doubleFormatter.format(angle));
         strBuilder.append(",");
         strBuilder.append(doubleFormatter.format(distanceFromRacingLine));
         strBuilder.append(",");
-        strBuilder.append(doubleFormatter.format(racingLine15));
-        strBuilder.append(",");
-        strBuilder.append(trackEdge[0] < 0.1f ? 1 : 0);
+        //strBuilder.append(doubleFormatter.format(racingLine15));
+        //strBuilder.append(",");
+        strBuilder.append(outOfTrack);
         strBuilder.append(",");
         strBuilder.append(doubleFormatter.format(meanCurve));
         strBuilder.append(",");
+        strBuilder.append(doubleFormatter.format(trackBBoxWidth));
+        strBuilder.append(",");
+        strBuilder.append(doubleFormatter.format(trackBBoxHeight));
+        strBuilder.append(",");
+        strBuilder.append(trackVisibility);
+        strBuilder.append(",");
+
+        
         
         //strBuilder.append(steeringRawInput);
         //strBuilder.append(",");        
@@ -848,10 +1029,21 @@ public class padDriver extends Controller {
     }
     
     private int getGear(SensorModel sensors, int accelerate) {
+        
         int gear = sensors.getGear();
         double rpm = sensors.getRPM();
         double speed = sensors.getSpeed();
+        /*
+        gearFis.setVariable("speed", speed);
+        gearFis.setVariable("rpm", rpm);
+        gearFis.evaluate();
+        return new Double(Math.floor(gearFis.getVariable("gear").getValue())).intValue();
+        */
         
+        
+        
+                
+                
         // jeżeli się cofam
         if (speed <= -1.0f){
             return -1;
@@ -887,6 +1079,8 @@ public class padDriver extends Controller {
         {
             return gear;
         }
+        
+
     }
     
     @Override
@@ -910,9 +1104,10 @@ public class padDriver extends Controller {
         return ret;
     }
 
-    void setFIS(FIS steeringFis, FIS accelFis) {
+    void setFIS(FIS steeringFis, FIS accelFis, FIS gearFis) {
         this.steeringFis = steeringFis;
         this.accelFis = accelFis;
+        this.gearFis = gearFis;
         variablesInUseSteering = this.steeringFis.getFunctionBlock("fb").getVariables().keySet();
         variablesInUseAccel = this.accelFis.getFunctionBlock("fb").getVariables().keySet();
     }
