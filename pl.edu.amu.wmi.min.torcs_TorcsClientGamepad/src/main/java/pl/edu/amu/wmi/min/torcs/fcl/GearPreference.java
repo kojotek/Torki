@@ -11,6 +11,8 @@ import sun.security.util.ObjectIdentifier;
 public class GearPreference {
     public List<Integer> gearUps = new ArrayList<Integer>();
     public List<Integer> gearDowns = new ArrayList<Integer>();
+    public List<Integer> speedUps = new ArrayList<Integer>();
+    public List<Integer> speedDowns = new ArrayList<Integer>();
     
     
     public void Load(String file) throws FileNotFoundException, IOException
@@ -21,11 +23,15 @@ public class GearPreference {
             for (String str: all.get(0)){
                 gearUps.add(new Integer(str));
             }
-            for (String str: all.get(0)){
-                gearUps.add(new Integer(str));
-            }
             for (String str: all.get(1)){
                 gearDowns.add(new Integer(str));
+            }
+            
+            for (String str: all.get(2)){
+                speedUps.add(new Integer(str));
+            }
+            for (String str: all.get(3)){
+                speedDowns.add(new Integer(str));
             }
         }
     }

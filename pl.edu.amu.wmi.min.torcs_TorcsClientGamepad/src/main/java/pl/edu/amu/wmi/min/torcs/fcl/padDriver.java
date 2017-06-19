@@ -13,21 +13,53 @@ import net.sourceforge.jFuzzyLogic.rule.Variable;
 
 public class padDriver extends Controller {
 
+    enum InputType{
+        fuzzyControl, pad;
+    }
+    
+    double ABS_MINSPEED = 3.0;    /* [m/s] */
+    double ABS_SLIP = 0.9;
+    
+    double TCL_SLIP = 0.9;        /* [-] range [0.95..0.3] */
+    double TCL_MINSPEED = 3.0;    /* [m/s] */
+    
+    int FRONT_RIGHT = 0;
+    int FRONT_LEFT = 1;
+    int REAR_RIGHT = 2;
+    int REAR_LEFT = 3;
+
+    
+    InputType steeringInputType = InputType.fuzzyControl;
+    InputType accelerationInputType = InputType.fuzzyControl;
+    double counter = 0.0f;
+    double distancesFromRacingLineSum = 0.0f;
+    double squareDistancesFromRacingLineSum = 0.0f;
+    double lastLapTime = 0.0f;
     boolean useFuzzyDriverSteering = true;
     boolean useFuzzyDriverAcceleration = true;
+    boolean fuzzyAccelControllerAlwaysGasOn = true;
+    boolean automaticGear = true;
     boolean useBot = false;
+    boolean useSpeedLimiter = true;
     Set<String> variablesInUseSteering;
     Set<String> variablesInUseAccel; 
     boolean pulse;
+    boolean simulationOver;
     net.java.games.input.Controller pad;
     private final float[] angles;
     private List<Point2D.Double> points;
+    /*
     private  int[] gearUp = {9000, 8000, 8000, 8000, 8000, 0};
     private  int[] gearDown = {0, 2500, 3000, 3000, 3500, 3500};
-    private int steeringRawInput, accelerationRawInput = 0;
-    private boolean gasPressed, brakePressed = false;
+    */
+    private int steeringCommand, accelerationCommand = 0;
+    private int padGasPressed, padBrakePressed = 0;
+    private int padSteering, padAcceleration = 0;
+    private int padGear = 0;
+    private int fuzzyControllerSteering, fuzzyControllerAcceleration = 0;
     private float smoothedSteering = 0.0f;
     private RacingLine racingLine;
+    private GearPreference gearPreference;
     
     FIS steeringFis;
     FIS accelFis;
@@ -111,11 +143,14 @@ public class padDriver extends Controller {
                 + "trackBBoxWidth,"
                 + "trackBBoxHeigth,"
                 + "trackVisibility,"
+                + "unknownSteeringSituation,"
+                + "unknownAccelerationSituation,"
                 + "inputSteering,"
-//                + "steering,"
+                + "steering,"
                 + "inputAcceleration,"
-//                + "gas,"
-//                + "brake,"
+                + "speedLimit,"
+                + "gas,"
+                + "brake,"
                 //+ "gear"
         );
 
@@ -125,13 +160,16 @@ public class padDriver extends Controller {
     @Override
     public Action control(SensorModel sensors) {
         
-        
+        counter++;
         
         if(firstLoop){
             double[] edges = sensors.getTrackEdgeSensors();
             
             roadWidth = edges[0] + edges[edges.length-1];
             firstLoop = false;
+            
+            simulationOver = false;
+            lastLapTime = sensors.getLastLapTime();
         }
         
         
@@ -145,36 +183,55 @@ public class padDriver extends Controller {
             switch(id){
                 case "pov":
                     if (value > 0.75f || (value < 0.25f && value > 0.0f)){
-                        steeringRawInput = 1;
+                        padSteering = 1;
                     }
                     else if (value > 0.25f && value < 0.75f){
-                        steeringRawInput = -1;
+                        padSteering = -1;
                     }
                     else{
-                        steeringRawInput = 0;
+                        padSteering = 0;
                     }
                 break;
-
+                
+                case "z":
+                    if (-value > 0.1f && -value < 0.8f){
+                        padAcceleration = 1;
+                    }
+                    if (-value >= 0.8f){
+                        padAcceleration = 2;
+                    }
+                    if (-value <= 0.1f && -value >= -0.1f){
+                        padAcceleration = 0;
+                    }
+                    if (-value <= -0.1f ){
+                        padAcceleration = -1;
+                    }
+                    //System.err.println(padAcceleration);
+                    break;
+                
+                /* 
                 case "5":
-                    gasPressed = (value > 0.0f);
+                    
                 break;
 
+                
                 case "4":
-                    brakePressed = (value > 0.0f);
+                    padBrakePressed = (value > 0.0f);
+                break;
+                
+                case "0": 
+                    padGear = Math.min(padGear+(int)value, 6);
+                break;
+                */
+                
+                case "1":
+                case "2":
+                     padGear = Math.max(padGear-(int)value, -1);
                 break;
             }
         }
 
-        if (gasPressed == brakePressed){
-            accelerationRawInput = 0;
-        }
-        else if (gasPressed){
-            accelerationRawInput = 2;
-        }
-        else if (brakePressed){
-            accelerationRawInput = -1;
-        }
-        
+        //padAcceleration = padGasPressed;
 
         double[] trackEdge = sensors.getTrackEdgeSensors();
         
@@ -575,7 +632,7 @@ public class padDriver extends Controller {
         
         
         
-                /**********************************************/
+        /**********************************************/
         //Here is place for temporary hacks           //
         /**********************************************/
         
@@ -616,25 +673,12 @@ public class padDriver extends Controller {
             }
 
         }
-        
-        if (useBot){
-            if(refSteer > 0.6f){
-                steeringRawInput = -1;
-            } 
-            else if (refSteer < -0.6f){
-                steeringRawInput = 1;
-            }
-            else{
-                steeringRawInput = 0;
-            }
-        }
-        
-        
+
         double trackVisibility = racingLinePoints.size();
 
         double biggestX = 0.0f;
         double smallestX = 0.0f;
-        double trackBBoxHeight = 0.0f;
+        double trackBBoxHeigth = 0.0f;
         for (int i = 0; i < racingLinePoints.size(); i++) {
             if (racingLinePoints.get(i).x > biggestX){
                 biggestX = racingLinePoints.get(i).x;
@@ -642,8 +686,8 @@ public class padDriver extends Controller {
             if (racingLinePoints.get(i).x < smallestX){
                 smallestX = racingLinePoints.get(i).x;
             }
-            if (Math.abs(racingLinePoints.get(i).y) > trackBBoxHeight){
-                trackBBoxHeight = Math.abs(racingLinePoints.get(i).y);
+            if (Math.abs(racingLinePoints.get(i).y) > trackBBoxHeigth){
+                trackBBoxHeigth = Math.abs(racingLinePoints.get(i).y);
             }
         }
         
@@ -653,29 +697,48 @@ public class padDriver extends Controller {
             trackBBoxWidth = 1.0f;
         }
         
-        double destinatedSpeed = 2800.0f/trackBBoxWidth - 100.0f/trackBBoxHeight;
+        double destinatedSpeed = 2800.0f/trackBBoxWidth - 100.0f/trackBBoxHeigth;
         
+        /*
         if (useBot){
             if (speed > destinatedSpeed + 10.0f){
-                accelerationRawInput = -1;
+                accelerationCommand = -1;
             }
             else if (speed < destinatedSpeed - 10.0f){
-                accelerationRawInput = 2;
+                accelerationCommand = 2;
             }
             else{
-                accelerationRawInput = 1;
+                accelerationCommand = 1;
             }
         }
-
+*/
         
         /**********************************************/
         //Here is place for temporary hacks           //
         /**********************************************/
         
         
+        if(!simulationOver){
+            distancesFromRacingLineSum += Math.abs(distanceFromRacingLine);
+            squareDistancesFromRacingLineSum += (distanceFromRacingLine * distanceFromRacingLine);
+            
+            if(lastLapTime != sensors.getLastLapTime() || outOfTrack != 0){
+                System.err.println("distance from start line: " + distanceFromStartLine);
+                System.err.println("distance raced: " + sensors.getDistanceRaced());
+                System.err.println("average distance from racing line: " + distancesFromRacingLineSum/counter);
+                System.err.println("RMSE distance from racing line: " + squareDistancesFromRacingLineSum/counter);
+                
+                lastLapTime = sensors.getLastLapTime();
+                if(outOfTrack != 0){
+                    simulationOver = true;
+                }
+            }
+        }
         
         
         
+        int unknownSteeringSituation = 0;
+        int unknownAccelerationSituation = 0;
         
         
         if (useFuzzyDriverSteering){
@@ -700,20 +763,35 @@ public class padDriver extends Controller {
             if (variablesInUseSteering.contains("meanCurve")){
                 steeringFis.setVariable("meanCurve", meanCurve);
             }
-            if (variablesInUseSteering.contains("outOfTrack")){
-                steeringFis.setVariable("outOfTrack", outOfTrack);
-            }
             if (variablesInUseSteering.contains("trackBBoxWidth")){
                 steeringFis.setVariable("trackBBoxWidth", trackBBoxWidth);
             }
-            if (variablesInUseSteering.contains("trackBBoxHeight")){
-                steeringFis.setVariable("trackBBoxHeight", trackBBoxHeight);
+            if (variablesInUseSteering.contains("trackBBoxHeigth")){
+                steeringFis.setVariable("trackBBoxHeigth", trackBBoxHeigth);
+            }
+            if (variablesInUseSteering.contains("trackVisibility")){
+                steeringFis.setVariable("trackVisibility", trackVisibility);
             }
             if (variablesInUseSteering.contains("outOfTrack")){
                 steeringFis.setVariable("outOfTrack", outOfTrack);
             }
             if (variablesInUseSteering.contains("sideSpeed")){
                 steeringFis.setVariable("sideSpeed", sideSpeed);
+            }
+            if (variablesInUseSteering.contains("rpm")){
+                steeringFis.setVariable("rpm", sensors.getRPM());
+            }
+            if (variablesInUseSteering.contains("gear")){
+                steeringFis.setVariable("gear", sensors.getGear());
+            }
+            if (variablesInUseSteering.contains("gas")){
+                steeringFis.setVariable("gas", toReturn.accelerate);
+            }
+            if (variablesInUseSteering.contains("brake")){
+                steeringFis.setVariable("brake", toReturn.brake);
+            }
+            if (variablesInUseSteering.contains("steering")){
+                steeringFis.setVariable("steering", toReturn.steering);
             }
             for (int i = 0; i < trackEdge.length; i++) {
                 if (variablesInUseSteering.contains("track" + Integer.toString(i))){
@@ -726,19 +804,25 @@ public class padDriver extends Controller {
                 }
             }
 
+                 
+            
             steeringFis.evaluate();
             double rawSteer = steeringFis.getVariable("inputSteering").getValue();
-            //System.err.println(rawValue);
-            if(rawSteer > 0.33f){
-                steeringRawInput = 1;
+            
+            
+            if (rawSteer > 90.0f){
+                unknownSteeringSituation = 1;
+            }
+            else if(rawSteer > 0.33f){
+                fuzzyControllerSteering = 1;
             } else if (rawSteer < -0.33f){
-                steeringRawInput = -1;
+                fuzzyControllerSteering = -1;
             } else {
-                steeringRawInput = 0;
+                fuzzyControllerSteering = 0;
             }
         }
 
-            
+  
         if (useFuzzyDriverAcceleration){
 
             if (variablesInUseAccel.contains("angle")){
@@ -768,14 +852,29 @@ public class padDriver extends Controller {
             if (variablesInUseAccel.contains("trackBBoxWidth")){
                 accelFis.setVariable("trackBBoxWidth", trackBBoxWidth);
             }
-            if (variablesInUseAccel.contains("trackBBoxHeight")){
-                accelFis.setVariable("trackBBoxHeight", trackBBoxHeight);
-            }
-            if (variablesInUseAccel.contains("outOfTrack")){
-                accelFis.setVariable("outOfTrack", outOfTrack);
+            if (variablesInUseAccel.contains("trackBBoxHeigth")){
+                accelFis.setVariable("trackBBoxHeigth", trackBBoxHeigth);
             }
             if (variablesInUseAccel.contains("sideSpeed")){
                 accelFis.setVariable("sideSpeed", sideSpeed);
+            }
+            if (variablesInUseAccel.contains("rpm")){
+                accelFis.setVariable("rpm,", sensors.getRPM());
+            }
+            if (variablesInUseAccel.contains("gear")){
+                accelFis.setVariable("gear,", sensors.getGear());
+            }
+            if (variablesInUseAccel.contains("trackVisibility")){
+                accelFis.setVariable("trackVisibility,", trackVisibility);
+            }
+            if (variablesInUseAccel.contains("gas")){
+                accelFis.setVariable("gas", toReturn.accelerate);
+            }
+            if (variablesInUseAccel.contains("brake")){
+                accelFis.setVariable("brake", toReturn.brake);
+            }
+            if (variablesInUseAccel.contains("steering")){
+                accelFis.setVariable("steering", toReturn.steering);
             }
             for (int i = 0; i < trackEdge.length; i++) {
                 if (variablesInUseAccel.contains("track" + Integer.toString(i))){
@@ -788,18 +887,25 @@ public class padDriver extends Controller {
                 }
             }
 
+
+            
             
             accelFis.evaluate();
             double rawAccel = accelFis.getVariable("inputAcceleration").getValue();
 
-            accelerationRawInput = (int) Math.round(rawAccel);
-            
-            if(rawAccel > 0.33f){
-                accelerationRawInput = 2;
-            } else if (rawAccel < -0.33f){
-                accelerationRawInput = -1;
-            } else {
-                accelerationRawInput = 0;
+            if (fuzzyAccelControllerAlwaysGasOn){
+                fuzzyControllerAcceleration = 2;
+            }
+            else{
+                if(rawAccel > 90.00f){
+                    unknownAccelerationSituation = 1;
+                } else if(rawAccel > 0.33f){
+                    fuzzyControllerAcceleration = 2;
+                } else if (rawAccel < -0.33f){
+                    fuzzyControllerAcceleration = -1;
+                } else {
+                    fuzzyControllerAcceleration = 0;
+                }
             }
         }
         
@@ -807,12 +913,38 @@ public class padDriver extends Controller {
         
         
 
+        if (steeringInputType == InputType.fuzzyControl){
+            steeringCommand = fuzzyControllerSteering;
+        }
+        if (steeringInputType == InputType.pad){
+           steeringCommand = padSteering;
+        }
+        
+        
+        if (accelerationInputType == InputType.fuzzyControl){
+           accelerationCommand = fuzzyControllerAcceleration;
+        }
+        if (accelerationInputType == InputType.pad){
+            accelerationCommand = padAcceleration;
+
+        }
+        
+  
+        if (useSpeedLimiter){
+            double speedLimit = racingLine.GetSpeedLimitAfter(distanceFromStartLine);
+            double speedDifference = speed - speedLimit;
+            if(speedDifference > 10.0f){
+                accelerationCommand = -1;
+            }
+            else if (speedDifference < 10.0f && speedDifference >= 0.0f ){
+                accelerationCommand = 1;
+            }
+        }
 
         
         
         
-        
-        switch (accelerationRawInput){
+        switch (accelerationCommand){
             case(0):
                 toReturn.accelerate = 0.0f;
                 toReturn.brake = 0.0f;
@@ -850,25 +982,33 @@ public class padDriver extends Controller {
                 break;
         }
         
-        toReturn.gear = getGear(sensors, accelerationRawInput);
+        toReturn.gear = getGear(sensors, accelerationCommand);
         
-        if(toReturn.brake > 0.1f && Math.abs(sensors.getWheelSpinVelocity()[0]) < 1.0f){
-            toReturn.brake = 0.0f;
-        }
+        //ABS
+        toReturn.brake = filterABS(sensors, toReturn.brake);
+        toReturn.accelerate = filterTCL(sensors, toReturn.accelerate);
         
-        switch (steeringRawInput){
+        switch (steeringCommand){
             case(0):
                 toReturn.steering = 0.0f;
                 break;
             case(1):
+                if(toReturn.steering < 0.0f){
+                    toReturn.steering = 0.0f;
+                }
                 toReturn.steering += 0.05f;
                 break;
             case(-1):
+                if(toReturn.steering > 0.0f){
+                    toReturn.steering = 0.0f;
+                }
                 toReturn.steering -= 0.05f;
                 break;
-        }        
+        }
         
-        
+        toReturn.accelerate = Math.min( toReturn.accelerate, 1.0f);
+        toReturn.brake = Math.min( toReturn.brake, 1.0f);
+        toReturn.steering = Math.max(-1.0f, Math.min( toReturn.steering, 1.0f));
         
 
         
@@ -958,45 +1098,56 @@ public class padDriver extends Controller {
         strBuilder.append(",");
         strBuilder.append(doubleFormatter.format(trackBBoxWidth));
         strBuilder.append(",");
-        strBuilder.append(doubleFormatter.format(trackBBoxHeight));
+        strBuilder.append(doubleFormatter.format(trackBBoxHeigth));
         strBuilder.append(",");
         strBuilder.append(trackVisibility);
         strBuilder.append(",");
+        strBuilder.append(unknownSteeringSituation);
+        strBuilder.append(",");
+        strBuilder.append(unknownAccelerationSituation);
+        strBuilder.append(",");
 
         
-        
-        //strBuilder.append(steeringRawInput);
-        //strBuilder.append(",");        
-//Instead:
-
-        
-        if (steeringRawInput == 1){
-            strBuilder.append("Right");
-        } 
-        else if (steeringRawInput == -1){
-            strBuilder.append("Left");
+        if (steeringCommand == 1){
+            strBuilder.append("s1");
+        } else if (steeringCommand == -1){
+            strBuilder.append("s_1");
+        } else if (steeringCommand == 0){
+            strBuilder.append("s0");
         } else{
-            strBuilder.append("Middle");
+            strBuilder.append("Unknown");
         }
         
         strBuilder.append(",");
         
-//        strBuilder.append(toReturn.steering);
+        strBuilder.append(doubleFormatter.format(toReturn.steering));
+        strBuilder.append(",");
 
 
 
-        if (accelerationRawInput == 2){
-            strBuilder.append("Forward");
-        } 
-        else if (accelerationRawInput == -1){
-            strBuilder.append("Backward");
+        if (accelerationCommand == 2){
+            strBuilder.append("a2");
+        } else if (accelerationCommand == 1){
+            strBuilder.append("a1");
+        } else if (accelerationCommand < 0){
+            strBuilder.append("a_1");
+        } else if (accelerationCommand == 0){
+            strBuilder.append("a0");
         } else{
-            strBuilder.append("Middle");
+            strBuilder.append("Unknown");
         }
         
         strBuilder.append(",");
+        
+        strBuilder.append("v" + new Double(racingLine.GetSpeedLimitAfter(distanceFromStartLine)).intValue());
+        strBuilder.append(",");
 
-//        strBuilder.append(accelerationRawInput);
+        strBuilder.append(doubleFormatter.format(toReturn.accelerate));
+        strBuilder.append(",");
+        strBuilder.append(doubleFormatter.format(toReturn.brake));
+        strBuilder.append(",");
+        
+//        strBuilder.append(accelerationCommand);
 //        strBuilder.append(",");
 
 
@@ -1035,60 +1186,65 @@ public class padDriver extends Controller {
         int gear = sensors.getGear();
         double rpm = sensors.getRPM();
         double speed = sensors.getSpeed();
+        
         /*
         gearFis.setVariable("speed", speed);
         gearFis.setVariable("rpm", rpm);
+        gearFis.setVariable("gear", rpm);
         gearFis.evaluate();
-        return new Double(Math.floor(gearFis.getVariable("gear").getValue())).intValue();
+        return new Double(Math.floor(gearFis.getVariable("nextGear").getValue())).intValue();
         */
         
         
-        
-                
-                
-        // jeżeli się cofam
-        if (speed <= -1.0f){
-            return -1;
-        }
-        
-        //jezeli stoje w miejscu
-        if (speed > -1.0f && speed <= 1.0f){
-            if(accelerate == 0 ){
-                return 0;
-            }
-            else if(accelerate > 0){
-                return 1;
-            }
-            else if(accelerate < 0){
+        if (automaticGear){
+            
+            // jeżeli się cofam
+            if (speed <= -1.0f){
                 return -1;
             }
+
+            //jezeli stoje w miejscu
+            if (speed > -1.0f && speed <= 1.0f){
+                if(accelerate == 0 ){
+                    return 0;
+                }
+                else if(accelerate > 0){
+                    return 1;
+                }
+                else if(accelerate < 0){
+                    return -1;
+                }
+            }
+
+            // jezeli jadę do przodu
+            if(speed > 1.0f && gear < 1){
+                return 1;
+            }
+
+            // check if the RPM value of car is greater than the one suggested 
+            // to shift up the gear from the current one     
+            if (gear < 6 && rpm >= gearPreference.gearUps.get(gear - 1) && speed >= gearPreference.speedUps.get(gear-1)) {
+                return gear + 1;
+            } else // check if the RPM value of car is lower than the one suggested 
+            // to shift down the gear from the current one
+            if (gear > 1 && (rpm <= gearPreference.gearDowns.get(gear - 1) || speed <= gearPreference.speedDowns.get(gear-1))) {
+                return gear - 1;
+            } else // otherwhise keep current gear
+            {
+                return gear;
+            }
+        
+        }
+        else{
+            return padGear;
         }
         
-        // jezeli jadę do przodu
-        if(speed > 1.0f && gear < 1){
-            return 1;
-        }
-
-        // check if the RPM value of car is greater than the one suggested 
-        // to shift up the gear from the current one     
-        if (gear < 6 && rpm >= gearUp[gear - 1]) {
-            return gear + 1;
-        } else // check if the RPM value of car is lower than the one suggested 
-        // to shift down the gear from the current one
-        if (gear > 1 && rpm <= gearDown[gear - 1]) {
-            return gear - 1;
-        } else // otherwhise keep current gear
-        {
-            return gear;
-        }
-        
-
     }
+    
     
     @Override
     public void setGearsPreferences(GearPreference gp){
-        gearUp = convertIntegers(gp.gearUps);
-        gearDown = convertIntegers(gp.gearDowns);
+        gearPreference = gp;
     }
     
     @Override
@@ -1113,4 +1269,60 @@ public class padDriver extends Controller {
         variablesInUseSteering = this.steeringFis.getFunctionBlock("fb").getVariables().keySet();
         variablesInUseAccel = this.accelFis.getFunctionBlock("fb").getVariables().keySet();
     }
+    
+    
+    
+    
+
+    
+    double filterABS(SensorModel sensors,double brake){
+        double newBrake = brake;
+        if ((sensors.getSpeed()/3.6f) < ABS_MINSPEED) {
+            return newBrake;
+        }
+        else{
+            double slip = 0.0f;
+            for (int i = 0; i < 4; i++) {
+                slip += sensors.getWheelSpinVelocity()[i] * getwheelRadius(i) / (sensors.getSpeed()/3.6f);
+            }
+            slip = slip/4.0f;
+        
+            if (slip < ABS_SLIP){
+                newBrake = brake*slip;
+            }
+                
+            return newBrake;
+        }
+    }
+    
+    
+    double getwheelRadius(int wheel){
+        if (wheel == FRONT_LEFT || wheel == FRONT_RIGHT){
+            return 0.3306f;
+        }
+        else{
+            return 0.3192;
+        }
+    }
+    
+    
+    double filterTCL(SensorModel sensors, double accel){
+        
+        double newAccel = accel;
+        
+        if ((sensors.getSpeed()/3.6f) < TCL_MINSPEED){
+            return newAccel;
+        }
+        double DRIVEN_WHEEL_SPEED = (sensors.getWheelSpinVelocity()[REAR_RIGHT] + sensors.getWheelSpinVelocity()[REAR_LEFT]) * getwheelRadius(REAR_LEFT) / 2.0;
+        
+        double slip = (sensors.getSpeed()/3.6f)/DRIVEN_WHEEL_SPEED;
+        
+        if (slip < TCL_SLIP) {
+            newAccel = 0.0;
+        }
+        return newAccel;
+
+    }
+    
+    
 }
