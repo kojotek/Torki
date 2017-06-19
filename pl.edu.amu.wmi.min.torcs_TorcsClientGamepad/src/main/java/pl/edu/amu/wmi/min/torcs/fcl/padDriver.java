@@ -172,64 +172,67 @@ public class padDriver extends Controller {
             lastLapTime = sensors.getLastLapTime();
         }
         
-        
-        pad.poll();
-        net.java.games.input.EventQueue queue = pad.getEventQueue();
-        net.java.games.input.Event event = new net.java.games.input.Event();
+        if (pad != null){
+            
+            pad.poll();
+            net.java.games.input.EventQueue queue = pad.getEventQueue();
+            net.java.games.input.Event event = new net.java.games.input.Event();
 
-        while(queue.getNextEvent(event)) {
-            String id = event.getComponent().getIdentifier().toString();
-            float value = event.getValue(); 
-            switch(id){
-                case "pov":
-                    if (value > 0.75f || (value < 0.25f && value > 0.0f)){
-                        padSteering = 1;
-                    }
-                    else if (value > 0.25f && value < 0.75f){
-                        padSteering = -1;
-                    }
-                    else{
-                        padSteering = 0;
-                    }
-                break;
-                
-                case "z":
-                    if (-value > 0.1f && -value < 0.8f){
-                        padAcceleration = 1;
-                    }
-                    if (-value >= 0.8f){
-                        padAcceleration = 2;
-                    }
-                    if (-value <= 0.1f && -value >= -0.1f){
-                        padAcceleration = 0;
-                    }
-                    if (-value <= -0.1f ){
-                        padAcceleration = -1;
-                    }
-                    //System.err.println(padAcceleration);
+            while(queue.getNextEvent(event)) {
+                String id = event.getComponent().getIdentifier().toString();
+                float value = event.getValue(); 
+                switch(id){
+                    case "pov":
+                        if (value > 0.75f || (value < 0.25f && value > 0.0f)){
+                            padSteering = 1;
+                        }
+                        else if (value > 0.25f && value < 0.75f){
+                            padSteering = -1;
+                        }
+                        else{
+                            padSteering = 0;
+                        }
                     break;
-                
-                /* 
-                case "5":
-                    
-                break;
 
-                
-                case "4":
-                    padBrakePressed = (value > 0.0f);
-                break;
-                
-                case "0": 
-                    padGear = Math.min(padGear+(int)value, 6);
-                break;
-                */
-                
-                case "1":
-                case "2":
-                     padGear = Math.max(padGear-(int)value, -1);
-                break;
+                    case "z":
+                        if (-value > 0.1f && -value < 0.8f){
+                            padAcceleration = 1;
+                        }
+                        if (-value >= 0.8f){
+                            padAcceleration = 2;
+                        }
+                        if (-value <= 0.1f && -value >= -0.1f){
+                            padAcceleration = 0;
+                        }
+                        if (-value <= -0.1f ){
+                            padAcceleration = -1;
+                        }
+                        //System.err.println(padAcceleration);
+                        break;
+
+                    /* 
+                    case "5":
+
+                    break;
+
+
+                    case "4":
+                        padBrakePressed = (value > 0.0f);
+                    break;
+
+                    case "0": 
+                        padGear = Math.min(padGear+(int)value, 6);
+                    break;
+                    */
+
+                    case "1":
+                    case "2":
+                         padGear = Math.max(padGear-(int)value, -1);
+                    break;
+                }
             }
         }
+        
 
         //padAcceleration = padGasPressed;
 
@@ -722,16 +725,18 @@ public class padDriver extends Controller {
             distancesFromRacingLineSum += Math.abs(distanceFromRacingLine);
             squareDistancesFromRacingLineSum += (distanceFromRacingLine * distanceFromRacingLine);
             
-            if(lastLapTime != sensors.getLastLapTime() || outOfTrack != 0){
+            if(lastLapTime != sensors.getLastLapTime()){
                 System.err.println("distance from start line: " + distanceFromStartLine);
                 System.err.println("distance raced: " + sensors.getDistanceRaced());
                 System.err.println("average distance from racing line: " + distancesFromRacingLineSum/counter);
                 System.err.println("RMSE distance from racing line: " + squareDistancesFromRacingLineSum/counter);
                 
                 lastLapTime = sensors.getLastLapTime();
+                /*
                 if(outOfTrack != 0){
                     simulationOver = true;
                 }
+                */
             }
         }
         
