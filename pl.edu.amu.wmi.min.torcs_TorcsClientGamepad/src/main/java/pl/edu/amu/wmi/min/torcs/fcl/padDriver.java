@@ -9,7 +9,6 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Set;
 import net.sourceforge.jFuzzyLogic.FIS;
-import net.sourceforge.jFuzzyLogic.rule.Variable;
 
 public class padDriver extends Controller {
 
@@ -31,16 +30,20 @@ public class padDriver extends Controller {
     
     InputType steeringInputType = InputType.fuzzyControl;
     InputType accelerationInputType = InputType.fuzzyControl;
+    boolean useSpeedLimiter = true;
+        
+        
+    boolean fuzzyAccelControllerAlwaysGasOn = true;
+    
     double counter = 0.0f;
     double distancesFromRacingLineSum = 0.0f;
     double squareDistancesFromRacingLineSum = 0.0f;
     double lastLapTime = 0.0f;
     boolean useFuzzyDriverSteering = true;
     boolean useFuzzyDriverAcceleration = true;
-    boolean fuzzyAccelControllerAlwaysGasOn = true;
     boolean automaticGear = true;
     boolean useBot = false;
-    boolean useSpeedLimiter = true;
+
     Set<String> variablesInUseSteering;
     Set<String> variablesInUseAccel; 
     boolean pulse;
@@ -126,9 +129,12 @@ public class padDriver extends Controller {
                 + "track10,track11,track12,"
                 + "track13,track14,track15,"
                 + "track16,track17,track18,"
+                + "racingLine0,"
                 + "racingLine5,racingLine10,"
                 + "racingLine15,racingLine20,"
                 + "racingLine25,racingLine30,"
+                + "leftWall0,leftWall5,leftWall10,leftWall15,leftWall20,leftWall25,leftWall30,"
+                + "rightWall0,rightWall5,rightWall10,rightWall15,rightWall20,rightWall25,rightWall30,"
                 + "trackPosition,"
                 + "maxTrackEdge,"
                 + "speed,"
@@ -325,37 +331,12 @@ public class padDriver extends Controller {
         
         
         
-        
-        
-        
-        
-        
-        
         //estimating right side
         if(left){
             
-            /*
             ArrayList<Point2D.Double> newLeftPoints = new ArrayList<>();
-            //increasing resolution
-            for (int i = 1; i < leftPoints.size(); i++) {
-                
-                newLeftPoints.add(leftPoints.get(i-1));
-                
-                double dist = Point2D.distance(leftPoints.get(i).x, leftPoints.get(i).y, leftPoints.get(i-1).x, leftPoints.get(i-1).y);
-                int intDist = new Double(dist).intValue();
-                double xShift = (leftPoints.get(i).x - leftPoints.get(i-1).x) / (double)intDist;
-                double yShift = (leftPoints.get(i).y - leftPoints.get(i-1).y) / (double)intDist;
-                for (int j = 1; j < intDist; j++) {
-                    newLeftPoints.add(new Point2D.Double(leftPoints.get(i-1).x + xShift * j, leftPoints.get(i-1).y + yShift * j));
-                }
-            }
-            
-            if(!leftPoints.isEmpty()){
-                newLeftPoints.add(leftPoints.get(leftPoints.size()-1));
-                leftPoints = newLeftPoints;
-            }
-            */
-            
+
+            leftPoints = ChangeLineResoultion(leftPoints, 2.0f);
             
             if(leftPoints.size() >= 2){
                 double firstPointAngle = -Math.atan2(leftPoints.get(1).y - leftPoints.get(0).y, leftPoints.get(1).x - leftPoints.get(0).x);
@@ -393,6 +374,7 @@ public class padDriver extends Controller {
             }
             
             rightPoints = estimatedSet;
+
         }
         
         
@@ -402,31 +384,8 @@ public class padDriver extends Controller {
         
         //estimating left side
         else{
-            
-            /*
-            ArrayList<Point2D.Double> newRightPoints = new ArrayList<>();
-            //increasing resolution
-            for (int i = 1; i < rightPoints.size(); i++) {
-                
-                newRightPoints.add(rightPoints.get(i-1));
-                
-                double dist = Point2D.distance(rightPoints.get(i).x, rightPoints.get(i).y, rightPoints.get(i-1).x, rightPoints.get(i-1).y);
-                int intDist = new Double(dist).intValue();
-                double xShift = (rightPoints.get(i).x - rightPoints.get(i-1).x) / (double)intDist;
-                double yShift = (rightPoints.get(i).y - rightPoints.get(i-1).y) / (double)intDist;
-                
-                for (int j = 1; j < intDist; j++) {
-                    newRightPoints.add(new Point2D.Double(rightPoints.get(i-1).x + xShift * (double)j, rightPoints.get(i-1).y + yShift * (double)j));
-                }
-            }
-            
-            if (!rightPoints.isEmpty()){
-                newRightPoints.add(rightPoints.get(rightPoints.size()-1));
-                rightPoints = newRightPoints;
-            }
-            */
-            
 
+            rightPoints = ChangeLineResoultion(rightPoints, 2.0f);
             
             if(rightPoints.size() >= 2){
                 double firstPointAngle = -Math.atan2(rightPoints.get(1).y - rightPoints.get(0).y,
@@ -471,6 +430,77 @@ public class padDriver extends Controller {
             
         }
         
+        ArrayList<Double> leftPointsX = new ArrayList<>();
+        
+        for (int i = 0; i < 31; i+=5) {
+            if (i < leftPoints.size() ){
+
+                boolean found = false;
+                for (int j = 0; j < leftPoints.size(); j++) {
+                    if(leftPoints.get(j).y >= i){
+                        leftPointsX.add(leftPoints.get(i).x);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found){
+                    if (leftPointsX.isEmpty()){
+                        leftPointsX.add(new Double(0.0f));
+                    }
+                    else{
+                        leftPointsX.add(leftPointsX.get(leftPointsX.size()-1));
+                    }
+                }
+                
+            }
+            else if (leftPointsX.size() >= 2){
+                leftPointsX.add(leftPointsX.get(leftPointsX.size()-1) + (leftPointsX.get(leftPointsX.size()-1) - leftPointsX.get(leftPointsX.size()-2)));
+            }
+            else if (leftPointsX.size() == 1){
+                leftPointsX.add(leftPointsX.get(leftPointsX.size()-1));
+            }
+            else {
+                leftPointsX.add(new Double(0.0f));
+            }
+        }
+        
+        
+        
+        ArrayList<Double> rightPointsX = new ArrayList<>();
+        
+        for (int i = 0; i < 31; i+=5) {
+            if (i < rightPoints.size() ){
+
+                boolean found = false;
+                for (int j = 0; j < rightPoints.size(); j++) {
+                    if(rightPoints.get(j).y >= i){
+                        rightPointsX.add(rightPoints.get(i).x);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found){
+                    if (rightPointsX.isEmpty()){
+                        rightPointsX.add(new Double(0.0f));
+                    }
+                    else{
+                        rightPointsX.add(rightPointsX.get(rightPointsX.size()-1));
+                    }
+                }
+                
+            }
+            else if (rightPointsX.size() >= 2){
+                rightPointsX.add(rightPointsX.get(rightPointsX.size()-1) + (rightPointsX.get(rightPointsX.size()-1) - rightPointsX.get(rightPointsX.size()-2)));
+            }
+            else if (rightPointsX.size() == 1){
+                rightPointsX.add(rightPointsX.get(rightPointsX.size()-1));
+            }
+            else {
+                rightPointsX.add(new Double(0.0f));
+            }
+        }
+        
+        
         
         //putting racing line on the road
         double distanceFromStartLine = sensors.getDistanceFromStartLine();
@@ -491,6 +521,7 @@ public class padDriver extends Controller {
         centerLinePoints.add(new Point2D.Double(distanceToTrackCenter * Math.cos(radAngle), distanceToTrackCenter * Math.sin(radAngle)));
         racingLinePoints.add(new Point2D.Double(actualDistanceFromRacingLine * Math.cos(radAngle), actualDistanceFromRacingLine * Math.sin(radAngle)));
         
+        //setting up a racing line
         if(leftPoints.size() == rightPoints.size()){
             
             /*
@@ -526,6 +557,7 @@ public class padDriver extends Controller {
             }
             
             //increasing resolution of racing line
+            /*
             ArrayList<Point2D.Double> newRacingLinePoints = new ArrayList<>();
             double stepSize = 2.0f;
             double lastPointX = racingLinePoints.get(0).x;
@@ -556,6 +588,8 @@ public class padDriver extends Controller {
                 newRacingLinePoints.add(racingLinePoints.get(racingLinePoints.size()-1));
                 racingLinePoints = newRacingLinePoints;
             }
+            */
+            racingLinePoints = ChangeLineResoultion(racingLinePoints, 2.0f);
             
         }
         else{
@@ -661,9 +695,27 @@ public class padDriver extends Controller {
 
         ArrayList<Double> racingLineX = new ArrayList<>();
         
-        for (int i = 5; i < 31; i+=5) {
-            if (i < racingLinePoints.size() ){
-                racingLineX.add(racingLinePoints.get(i).x);
+        for (int i = 0; i < 31; i+=5) {
+
+            if (i < racingLinePoints.size()){
+
+                boolean found = false;
+                for (int j = 0; j < racingLinePoints.size(); j++) {
+                    if(racingLinePoints.get(j).y >= i){
+                        racingLineX.add(racingLinePoints.get(i).x);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found){
+                    if (racingLineX.isEmpty()){
+                        racingLineX.add(new Double(0.0f));
+                    }
+                    else{
+                        racingLineX.add(racingLineX.get(racingLineX.size()-1));
+                    }
+                }
+
             }
             else if (racingLineX.size() >= 2){
                 racingLineX.add(racingLineX.get(racingLineX.size()-1) + (racingLineX.get(racingLineX.size()-1) - racingLineX.get(racingLineX.size()-2)));
@@ -804,8 +856,18 @@ public class padDriver extends Controller {
                 }
             }
             for (int i = 0; i < racingLineX.size(); i++) {
-                if (variablesInUseSteering.contains("racingLine" + Integer.toString((i+1)*5))){
-                    steeringFis.setVariable("racingLine" + Integer.toString((i+1)*5), racingLineX.get(i));
+                if (variablesInUseSteering.contains("racingLine" + Integer.toString((i)*5))){
+                    steeringFis.setVariable("racingLine" + Integer.toString((i)*5), racingLineX.get(i));
+                }
+            }
+            for (int i = 0; i < leftPointsX.size(); i++) {
+                if (variablesInUseSteering.contains("leftWall" + Integer.toString((i)*5))){
+                    steeringFis.setVariable("leftWall" + Integer.toString((i)*5), leftPointsX.get(i));
+                }
+            }
+            for (int i = 0; i < rightPointsX.size(); i++) {
+                if (variablesInUseSteering.contains("rightWall" + Integer.toString((i)*5))){
+                    steeringFis.setVariable("rightWall" + Integer.toString((i)*5), rightPointsX.get(i));
                 }
             }
 
@@ -829,7 +891,7 @@ public class padDriver extends Controller {
 
   
         if (useFuzzyDriverAcceleration){
-
+/*
             if (variablesInUseAccel.contains("angle")){
                 accelFis.setVariable("angle", angle);
             }
@@ -887,11 +949,20 @@ public class padDriver extends Controller {
                 }
             }
             for (int i = 0; i < racingLineX.size(); i++) {
-                if (variablesInUseAccel.contains("racingLine" + Integer.toString((i+1)*5))){
-                    accelFis.setVariable("racingLine" + Integer.toString((i+1)*5), racingLineX.get(i));
+                if (variablesInUseAccel.contains("racingLine" + Integer.toString((i)*5))){
+                    accelFis.setVariable("racingLine" + Integer.toString((i)*5), racingLineX.get(i));
                 }
             }
-
+            for (int i = 0; i < leftPointsX.size(); i++) {
+                if (variablesInUseAccel.contains("leftWall" + Integer.toString((i)*5))){
+                    accelFis.setVariable("leftWall" + Integer.toString((i)*5), leftPointsX.get(i));
+                }
+            }
+            for (int i = 0; i < rightPointsX.size(); i++) {
+                if (variablesInUseAccel.contains("rightWall" + Integer.toString((i)*5))){
+                    accelFis.setVariable("rightWall" + Integer.toString((i)*5), rightPointsX.get(i));
+                }
+            }
 
             
             
@@ -912,6 +983,7 @@ public class padDriver extends Controller {
                     fuzzyControllerAcceleration = 0;
                 }
             }
+            */
         }
         
         
@@ -943,6 +1015,9 @@ public class padDriver extends Controller {
             }
             else if (speedDifference < 10.0f && speedDifference >= 0.0f ){
                 accelerationCommand = 1;
+            }
+            else if (speedDifference < 0.0f){
+                accelerationCommand = 2;
             }
         }
 
@@ -1073,6 +1148,14 @@ public class padDriver extends Controller {
         }
         for (int i = 0; i < racingLineX.size(); i++) {
             strBuilder.append(doubleFormatter.format(racingLineX.get(i)));
+            strBuilder.append(",");
+        }
+        for (int i = 0; i < leftPointsX.size(); i++) {
+            strBuilder.append(doubleFormatter.format(leftPointsX.get(i)));
+            strBuilder.append(",");
+        }
+        for (int i = 0; i < rightPointsX.size(); i++) {
+            strBuilder.append(doubleFormatter.format(rightPointsX.get(i)));
             strBuilder.append(",");
         }
         
@@ -1329,5 +1412,39 @@ public class padDriver extends Controller {
 
     }
     
-    
+    private ArrayList<Point2D.Double> ChangeLineResoultion(ArrayList<Point2D.Double> line, double stepSize){
+        
+        if (line.isEmpty()){
+            return new ArrayList<Point2D.Double>();
+        }
+        
+        ArrayList<Point2D.Double> newLine = new ArrayList<>();
+
+        double lastPointX = line.get(0).x;
+        double lastPointY = line.get(0).y;
+
+        newLine.add(line.get(0));
+
+        for (int i = 1; i < line.size(); i++) {
+
+            double dist = Point2D.distance(line.get(i).x, line.get(i).y, lastPointX, lastPointY);
+
+            while (dist > stepSize){
+                double xShift = stepSize * (line.get(i).x - lastPointX) / dist;
+                double yShift = stepSize * (line.get(i).y - lastPointY) / dist;
+                newLine.add(new Point2D.Double(lastPointX + xShift, lastPointY + yShift));
+
+                lastPointX = lastPointX + xShift;
+                lastPointY = lastPointY + yShift;
+
+                dist = Point2D.distance(line.get(i).x, line.get(i).y, lastPointX, lastPointY);
+            }
+
+        }
+
+        newLine.add(line.get(line.size()-1));
+        return newLine;
+
+    }
+        
 }
