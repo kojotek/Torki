@@ -43,7 +43,7 @@ public class FuzzyDriver extends Controller {
     double bestDistanceSoFar = 0.0f;
     
     
-    int counter = 0;
+    double counter = 0;
     
         public FuzzyDriver(FIS fis) throws InvalidConfigurationException, ParserConfigurationException, ImproperXMLException, UnsupportedRepresentationException, GeneCreationException, SAXException, IOException {
         this.fis = fis;
