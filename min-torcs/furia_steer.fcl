@@ -27,6 +27,9 @@ END_VAR
 
 VAR_OUTPUT
 	inputSteering : REAL;
+	steeringAdjustSpeed : REAL;
+	accelerationAdjustSpeed : REAL;
+	brakeAdjustSpeed : REAL;
 END_VAR
 
 
@@ -206,6 +209,23 @@ DEFUZZIFY inputSteering
 
 	METHOD : COGS;
 	DEFAULT := 999;
+END_DEFUZZIFY
+
+
+DEFUZZIFY steeringAdjustSpeed
+	METHOD : COGS;
+	DEFAULT := 0.05;
+END_DEFUZZIFY
+
+
+DEFUZZIFY accelerationAdjustSpeed
+	METHOD : COGS;
+	DEFAULT := 0.1;
+END_DEFUZZIFY
+
+DEFUZZIFY brakeAdjustSpeed
+	METHOD : COGS;
+	DEFAULT := 0.1;
 END_DEFUZZIFY
 
 RULEBLOCK No1

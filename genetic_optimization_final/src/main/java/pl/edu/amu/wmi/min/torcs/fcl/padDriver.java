@@ -99,6 +99,7 @@ public class padDriver extends Controller {
     
     Action toReturn;
 
+    double currentFrameTime, lastFrameTime;
     
     //Visualisation visualisation;
     
@@ -121,7 +122,7 @@ public class padDriver extends Controller {
         //visualisation = new Visualisation();
         
         toReturn = new Action();
-        
+        /*
         net.java.games.input.Controller[] controllers = net.java.games.input.ControllerEnvironment.getDefaultEnvironment().getControllers();
         
         if(controllers.length==0) {
@@ -134,6 +135,7 @@ public class padDriver extends Controller {
                 pad = controller;
             }
         }
+        */
         
         this.angles = new float[19];
         /* set angles as {-90,-75,-60,-45,-30,-20,-15,-10,-5,0,5,10,15,20,30,45,60,75,90} */
@@ -209,6 +211,7 @@ public class padDriver extends Controller {
             lastLapTime = sensors.getLastLapTime();
         }
         
+        /*
         if (pad != null){
             
             pad.poll();
@@ -254,7 +257,7 @@ public class padDriver extends Controller {
                 }
             }
         }
-        
+        */
 
         //padAcceleration = padGasPressed;
 
@@ -278,6 +281,7 @@ public class padDriver extends Controller {
         }
         
         
+        /*
         
         //computing angles between points
         ArrayList<Double> borderAngles = new ArrayList<>();
@@ -293,6 +297,13 @@ public class padDriver extends Controller {
         
         borderAngles.add(Math.PI);
 
+        
+        
+        */
+        
+        
+        
+        
         //trying to realize, which point belongs to which band
         ArrayList<Point2D.Double> leftPoints = new ArrayList<>();
         ArrayList<Point2D.Double> rightPoints = new ArrayList<>();
@@ -350,7 +361,7 @@ public class padDriver extends Controller {
         //estimating right side
         if(left){
             
-            ArrayList<Point2D.Double> newLeftPoints = new ArrayList<>();
+            //ArrayList<Point2D.Double> newLeftPoints = new ArrayList<>();
 
             leftPoints = ChangeLineResoultion(leftPoints, 2.0f);
             
@@ -484,11 +495,11 @@ public class padDriver extends Controller {
         
         ArrayList<Double> rightPointsX = new ArrayList<>();
         
-        for (int i = 0; i < 31; i+=5) {
-            if (i < rightPoints.size() ){
+        for (int i = 0; i < 31; i+=5){
+            if (i < rightPoints.size()){
 
                 boolean found = false;
-                for (int j = 0; j < rightPoints.size(); j++) {
+                for (int j = 0; j < rightPoints.size(); j++){
                     if(rightPoints.get(j).y >= i){
                         rightPointsX.add(rightPoints.get(i).x);
                         found = true;
@@ -637,6 +648,7 @@ public class padDriver extends Controller {
         
         
         //mean of angles
+        /*
         double anglesChangeSum = 0.0f;
         double centerLineLength = 0.0f;
         
@@ -661,8 +673,10 @@ public class padDriver extends Controller {
                     Point2D.distance(centerLinePoints.get(centerLinePoints.size()-1).x, centerLinePoints.get(centerLinePoints.size()-1).y,
                     centerLinePoints.get(centerLinePoints.size()-2).x, centerLinePoints.get(centerLinePoints.size()-2).y);
         }
+        */
         
-        double meanCurve = anglesChangeSum/centerLineLength;
+        //double meanCurve = anglesChangeSum/centerLineLength;
+        double meanCurve = 0.0f;
         
         /*
         double racingLine15 = 0.0f;
@@ -686,10 +700,10 @@ public class padDriver extends Controller {
         
         
         /**********************************************/
-        //Here is place for temporary hacks           //
+        //      Here is place for temporary hacks     //
         /**********************************************/
         
-
+/*
         int racingLineindex = 5 + new Double(Math.abs(speed)).intValue() / 25;
         
         if (Math.abs(sideSpeed) > 25.0f){
@@ -708,7 +722,7 @@ public class padDriver extends Controller {
         if (racingLineindex >= 0){
             refSteer = racingLinePoints.get(racingLineindex).x;
         }
-
+*/
         ArrayList<Double> racingLineX = new ArrayList<>();
         
         for (int i = 0; i < 31; i+=5) {
@@ -747,9 +761,11 @@ public class padDriver extends Controller {
 
         double trackVisibility = racingLinePoints.size();
 
-        double biggestX = 0.0f;
-        double smallestX = 0.0f;
+        //double biggestX = 0.0f;
+        //double smallestX = 0.0f;
         double trackBBoxHeigth = 0.0f;
+        
+        /*
         for (int i = 0; i < racingLinePoints.size(); i++) {
             if (racingLinePoints.get(i).x > biggestX){
                 biggestX = racingLinePoints.get(i).x;
@@ -761,14 +777,18 @@ public class padDriver extends Controller {
                 trackBBoxHeigth = Math.abs(racingLinePoints.get(i).y);
             }
         }
+        */
         
-        double trackBBoxWidth = biggestX - smallestX;
+        //double trackBBoxWidth = biggestX - smallestX;
+        double trackBBoxWidth = 0;
         
+        /*
         if (trackBBoxWidth < 1){
             trackBBoxWidth = 1.0f;
         }
+        */
         
-        double destinatedSpeed = 2800.0f/trackBBoxWidth - 100.0f/trackBBoxHeigth;
+        //double destinatedSpeed = 2800.0f/trackBBoxWidth - 100.0f/trackBBoxHeigth;
         
         /*
         if (useBot){
@@ -1018,6 +1038,19 @@ public class padDriver extends Controller {
 
         
         
+        //time update
+        
+        currentFrameTime = System.nanoTime();
+        double deltaTime = (currentFrameTime - lastFrameTime) / 1000000000.0f;
+        lastFrameTime = currentFrameTime;
+        
+        
+        double accelerationAdjustSpeed = steeringFis.getVariable("accelerationAdjustSpeed").getValue();
+        double brakeAdjustSpeed = steeringFis.getVariable("brakeAdjustSpeed").getValue();
+        double steeringAdjustSpeed = steeringFis.getVariable("steeringAdjustSpeed").getValue();
+        
+        
+        double destinatedFPS = 50.0f;
         
         switch (accelerationCommand){
             case(0):
@@ -1026,32 +1059,32 @@ public class padDriver extends Controller {
                 break;
             case(1):
                 if (toReturn.gear > 0){
-                    toReturn.accelerate += 0.1f;
+                    toReturn.accelerate += deltaTime * destinatedFPS * accelerationAdjustSpeed;
                     toReturn.accelerate = Math.min(toReturn.accelerate, 0.5f);
                     toReturn.brake = 0.0f;
                 }
                 else if (toReturn.gear < 0){
                     toReturn.accelerate = 0f;
-                    toReturn.brake += 0.1f;
+                    toReturn.brake += deltaTime * destinatedFPS * brakeAdjustSpeed;
                 }
                 break;
             case(2):
                 if (toReturn.gear > 0){
-                    toReturn.accelerate += 0.1f;
+                    toReturn.accelerate += deltaTime * destinatedFPS * accelerationAdjustSpeed;
                     toReturn.brake = 0.0f;
                 }
                 else if (toReturn.gear < 0){
                     toReturn.accelerate = 0f;
-                    toReturn.brake += 0.1f; 
+                    toReturn.brake += deltaTime * destinatedFPS * brakeAdjustSpeed;
                 }
                 break;
             case(-1):
                 if (toReturn.gear > 0){
                     toReturn.accelerate = 0.0f;
-                    toReturn.brake += 0.1f;
+                    toReturn.brake += deltaTime * destinatedFPS * brakeAdjustSpeed;
                 }
                 else if (toReturn.gear < 0){
-                    toReturn.accelerate += 0.1f;
+                    toReturn.accelerate += deltaTime * destinatedFPS * accelerationAdjustSpeed;
                     toReturn.brake = 0.0f; 
                 }
                 break;
@@ -1071,13 +1104,13 @@ public class padDriver extends Controller {
                 if(toReturn.steering < 0.0f){
                     toReturn.steering = 0.0f;
                 }
-                toReturn.steering += 0.05f;
+                toReturn.steering += deltaTime * destinatedFPS * steeringAdjustSpeed;
                 break;
             case(-1):
                 if(toReturn.steering > 0.0f){
                     toReturn.steering = 0.0f;
                 }
-                toReturn.steering -= 0.05f;
+                toReturn.steering -= deltaTime * destinatedFPS * steeringAdjustSpeed;
                 break;
         }
         
@@ -1247,7 +1280,7 @@ public class padDriver extends Controller {
             lastLapTime = sensors.getLastLapTime();
         }
         
-        double trackCompleted = (lapsDone >= Consts.lapsPerCandidate ? 1.0f : 0.0f);
+        double trackCompleted = (lapsDone >= Consts.lapsPerCandidate ? Consts.trackCompletedBonus : Consts.trackNotCompletedBonus);
         distancesFromRacingLineSum += Math.abs(distanceFromRacingLine);
         squareDistancesFromRacingLineSum += (distanceFromRacingLine * distanceFromRacingLine);
         
@@ -1255,7 +1288,7 @@ public class padDriver extends Controller {
        
         double racingLineAverageDist = squareDistancesFromRacingLineSum/counter;   
         
-        double score = distanceRaced * (1.0f/racingLineAverageDist) * (1.0f+trackCompleted);
+        double score = distanceRaced * (1.0f/racingLineAverageDist) * (trackCompleted);
         
         geneticAlg.fitFunc.score = score;
         
@@ -1275,6 +1308,7 @@ public class padDriver extends Controller {
             System.err.println("distanceRaced: " + distanceRaced);
             System.err.println("racingLineAverageDist: " + racingLineAverageDist);
             System.err.println("trackCompleted: " + trackCompleted);
+            System.err.println("");
             
             if (geneticAlg.fitFunc.score <= 0.0f){
                 geneticAlg.fitFunc.score = 0f;

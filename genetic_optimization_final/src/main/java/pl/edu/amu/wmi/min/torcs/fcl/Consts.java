@@ -8,4 +8,6 @@ public class Consts {
     public static int generations = 10000;
     public static int maxTicksPerCandidate = 13000;
     static double maxDamage = 40.0f;
+    static double trackCompletedBonus = 10.0f;
+    static double trackNotCompletedBonus = 0.1f;
 }

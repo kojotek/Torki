@@ -47,6 +47,10 @@ public class TorcsFitnessFunction extends FitnessFunction{
     
     public volatile double score = 0.0f;
     
+    public int steeringAdjustSpeedGeneNum = 0;
+    public int accelerationAdjustSpeedGeneNum = 0;
+    public int brakeAdjustSpeedGeneNum = 0;
+    
     public volatile boolean ready = false;
     public static volatile int counter = 0;
     public FIS fis;
@@ -94,7 +98,13 @@ public class TorcsFitnessFunction extends FitnessFunction{
             Double value = entry.getWeight();
             ruleWeights.put(key, new RuleWeight(value, genesForTerms +  rulesCount));
             rulesCount++;
+            counter++;
         }
+        
+        steeringAdjustSpeedGeneNum = counter; counter++;
+        accelerationAdjustSpeedGeneNum = counter; counter++;
+        brakeAdjustSpeedGeneNum = counter;
+        
     }
     
     
@@ -144,6 +154,10 @@ public class TorcsFitnessFunction extends FitnessFunction{
                     
                 }
             }
+
+            fis.getFunctionBlock("fb").getVariable("steeringAdjustSpeed").setDefaultValue((Double) ic.getGene(steeringAdjustSpeedGeneNum).getAllele());
+            fis.getFunctionBlock("fb").getVariable("accelerationAdjustSpeed").setDefaultValue((Double) ic.getGene(accelerationAdjustSpeedGeneNum).getAllele());
+            fis.getFunctionBlock("fb").getVariable("brakeAdjustSpeed").setDefaultValue((Double) ic.getGene(brakeAdjustSpeedGeneNum).getAllele());
         }
         
         

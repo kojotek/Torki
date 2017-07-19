@@ -71,7 +71,7 @@ public class GeneticAlgorithm {
         fitFunc = new TorcsFitnessFunction(workingFis, fileName);
         conf.setFitnessFunction(fitFunc);
         
-        sampleGenes = new Gene[fitFunc.genesForTerms + fitFunc.rulesCount];
+        sampleGenes = new Gene[fitFunc.genesForTerms + fitFunc.rulesCount + 3];
         
         for (Map.Entry<String, HashMap<String, TorcsFitnessFunction.TermValue>> en : fitFunc.originalVariables.entrySet()) {
             String key = en.getKey();
@@ -92,6 +92,10 @@ public class GeneticAlgorithm {
             
             sampleGenes[value.geneNumber] = new DoubleGene(conf, 0.1f, 1.0f);
         }
+        
+        sampleGenes[sampleGenes.length-3] = new DoubleGene(conf, 0.0f, 0.5f);
+        sampleGenes[sampleGenes.length-2] = new DoubleGene(conf, 0.0f, 0.5f);
+        sampleGenes[sampleGenes.length-1] = new DoubleGene(conf, 0.0f, 0.5f);
         
         Chromosome sampleChromosome = new Chromosome(conf, sampleGenes);
         conf.setSampleChromosome( sampleChromosome );
