@@ -47,6 +47,7 @@ import org.jgap.gp.impl.DefaultGPFitnessEvaluator;
 import org.jgap.gp.impl.GPConfiguration;
 import org.jgap.gp.impl.GPGenotype;
 import org.jgap.gp.impl.TournamentSelector;
+import org.jgap.impl.BestChromosomesSelector;
 import org.jgap.util.SystemKit;
 import org.jgap.xml.XMLDocumentBuilder;
 import org.jgap.xml.XMLManager;
@@ -68,6 +69,8 @@ public class GeneticAlgorithm {
     
     public GeneticAlgorithm(FIS workingFis, String fileName) throws InvalidConfigurationException, FileNotFoundException, ParserConfigurationException, ImproperXMLException, UnsupportedRepresentationException, GeneCreationException, SAXException, IOException {
         conf = new DefaultConfiguration();
+        conf.removeNaturalSelectors(false);
+        conf.addNaturalSelector(new BestChromosomesSelector(conf, 0.2), false);
         fitFunc = new TorcsFitnessFunction(workingFis, fileName);
         conf.setFitnessFunction(fitFunc);
         
@@ -93,9 +96,9 @@ public class GeneticAlgorithm {
             sampleGenes[value.geneNumber] = new DoubleGene(conf, 0.1f, 1.0f);
         }
         
-        sampleGenes[sampleGenes.length-3] = new DoubleGene(conf, 0.0f, 0.5f);
-        sampleGenes[sampleGenes.length-2] = new DoubleGene(conf, 0.0f, 0.5f);
-        sampleGenes[sampleGenes.length-1] = new DoubleGene(conf, 0.0f, 0.5f);
+        sampleGenes[sampleGenes.length-3] = new DoubleGene(conf, 0.0f, 0.2f);
+        sampleGenes[sampleGenes.length-2] = new DoubleGene(conf, 0.0f, 0.2f);
+        sampleGenes[sampleGenes.length-1] = new DoubleGene(conf, 0.0f, 0.2f);
         
         Chromosome sampleChromosome = new Chromosome(conf, sampleGenes);
         conf.setSampleChromosome( sampleChromosome );

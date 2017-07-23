@@ -17,6 +17,10 @@ import org.jgap.IChromosome;
 
 public class TorcsFitnessFunction extends FitnessFunction{
 
+    enum CurrentState{
+        BuildingController, ReadyForTestRide, TestRide, TestRideCompleted, Start,
+    }
+    
     class TermValue{
 
         public TermValue(double left, double lMem, double ofst, double rMem, int genNum) {
@@ -46,13 +50,14 @@ public class TorcsFitnessFunction extends FitnessFunction{
     }
     
     public volatile double score = 0.0f;
+    public volatile CurrentState state = CurrentState.Start;
     
     public int steeringAdjustSpeedGeneNum = 0;
     public int accelerationAdjustSpeedGeneNum = 0;
     public int brakeAdjustSpeedGeneNum = 0;
     
-    public volatile boolean ready = false;
-    public static volatile int counter = 0;
+    //public volatile boolean ready = false;
+    public static volatile int chromosomeCounter = 0;
     public FIS fis;
     public FIS referenceFis;
     
@@ -104,7 +109,8 @@ public class TorcsFitnessFunction extends FitnessFunction{
         steeringAdjustSpeedGeneNum = counter; counter++;
         accelerationAdjustSpeedGeneNum = counter; counter++;
         brakeAdjustSpeedGeneNum = counter;
-        
+     
+        state = CurrentState.Start;
     }
     
     
@@ -112,65 +118,80 @@ public class TorcsFitnessFunction extends FitnessFunction{
     @Override
     public double evaluate(IChromosome ic) {
         
-        System.err.println("Testing chromosome nr " + ++counter);
-        padDriver.unitNumber++;
-        
-        
-        synchronized (fis){
-            
-            for (Map.Entry<String, HashMap<String, TermValue>> variable : originalVariables.entrySet()) {
-            
-                String variableName = variable.getKey();
-                HashMap<String, TermValue> variableValue = variable.getValue();
-
-                for (Map.Entry<String, TermValue> term : variableValue.entrySet()) {
-                    String termName = term.getKey();
-                    TermValue termValue = term.getValue();
-
-                    double x0 = termValue.leftValue + (Double) ic.getGene(termValue.geneNumber).getAllele();
-                    double y0 = termValue.leftMembership;
-                    double x1 = x0 + termValue.offset * (Double) ic.getGene(termValue.geneNumber + 1).getAllele();
-                    double y1 = termValue.rightMembership;
-                    
-                    fis.getFunctionBlock("fb")
-                            .getVariable(variableName)
-                            .getLinguisticTerm(termName)
-                            .setMembershipFunction(new MembershipFunctionPieceWiseLinear(new Value[]{new Value(x0), new Value(x1)}, new Value[]{new Value(y0),new Value(y1)}));
+        synchronized(state){
+            while(true){
+                if (state == CurrentState.Start || state == CurrentState.BuildingController){
+                    break;
                 }
             }
-            
-            
-            for (Map.Entry<String, RuleWeight> entry : ruleWeights.entrySet()) {
-                String ruleName = entry.getKey();
-                RuleWeight ruleWeight = entry.getValue();
-                
-                for (Iterator<Rule> iterator = fis.getFunctionBlock("fb").getFuzzyRuleBlock("No1").getRules().iterator(); iterator.hasNext();) {
-                    
-                    Rule next = iterator.next();
-                    
-                    if (next.getName().equals(ruleName)){
-                        next.setWeight((Double) ic.getGene(ruleWeight.geneNumber).getAllele());
+
+
+            System.err.println("Testing chromosome nr " + ++chromosomeCounter);
+            padDriver.unitNumber++;
+
+
+            synchronized (fis){
+
+                for (Map.Entry<String, HashMap<String, TermValue>> variable : originalVariables.entrySet()) {
+
+                    String variableName = variable.getKey();
+                    HashMap<String, TermValue> variableValue = variable.getValue();
+
+                    for (Map.Entry<String, TermValue> term : variableValue.entrySet()) {
+                        String termName = term.getKey();
+                        TermValue termValue = term.getValue();
+
+                        double x0 = termValue.leftValue + (Double) ic.getGene(termValue.geneNumber).getAllele();
+                        double y0 = termValue.leftMembership;
+                        double x1 = x0 + termValue.offset * (Double) ic.getGene(termValue.geneNumber + 1).getAllele();
+                        double y1 = termValue.rightMembership;
+
+                        fis.getFunctionBlock("fb")
+                                .getVariable(variableName)
+                                .getLinguisticTerm(termName)
+                                .setMembershipFunction(new MembershipFunctionPieceWiseLinear(new Value[]{new Value(x0), new Value(x1)}, new Value[]{new Value(y0),new Value(y1)}));
                     }
-                    
                 }
+
+
+                for (Map.Entry<String, RuleWeight> entry : ruleWeights.entrySet()) {
+                    String ruleName = entry.getKey();
+                    RuleWeight ruleWeight = entry.getValue();
+
+                    for (Iterator<Rule> iterator = fis.getFunctionBlock("fb").getFuzzyRuleBlock("No1").getRules().iterator(); iterator.hasNext();) {
+
+                        Rule next = iterator.next();
+
+                        if (next.getName().equals(ruleName)){
+                            next.setWeight((Double) ic.getGene(ruleWeight.geneNumber).getAllele());
+                        }
+
+                    }
+                }
+
+                fis.getFunctionBlock("fb").getVariable("steeringAdjustSpeed").setDefaultValue((Double) ic.getGene(steeringAdjustSpeedGeneNum).getAllele());
+                fis.getFunctionBlock("fb").getVariable("accelerationAdjustSpeed").setDefaultValue((Double) ic.getGene(accelerationAdjustSpeedGeneNum).getAllele());
+                fis.getFunctionBlock("fb").getVariable("brakeAdjustSpeed").setDefaultValue((Double) ic.getGene(brakeAdjustSpeedGeneNum).getAllele());
             }
 
-            fis.getFunctionBlock("fb").getVariable("steeringAdjustSpeed").setDefaultValue((Double) ic.getGene(steeringAdjustSpeedGeneNum).getAllele());
-            fis.getFunctionBlock("fb").getVariable("accelerationAdjustSpeed").setDefaultValue((Double) ic.getGene(accelerationAdjustSpeedGeneNum).getAllele());
-            fis.getFunctionBlock("fb").getVariable("brakeAdjustSpeed").setDefaultValue((Double) ic.getGene(brakeAdjustSpeedGeneNum).getAllele());
+            state = CurrentState.ReadyForTestRide;
         }
-        
+ 
         
         while(true){
-            if (ready){
+            if (state == CurrentState.TestRideCompleted){
                 break;
             }
         }
 
         double newScore = score;
         score = 0.0f;
-        ready = false;
+        //ready = false;
         System.err.println("Evaluated. Result: " + Double.toString(newScore));
+        System.err.println("");
+        synchronized(state){
+            state = CurrentState.BuildingController;
+        }
         return newScore;
     }
     
