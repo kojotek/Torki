@@ -1,0 +1,259 @@
+FUNCTION_BLOCK fb
+
+VAR_INPUT
+	leftWall0 : REAL;
+	leftWall10 : REAL;
+	leftWall15 : REAL;
+	leftWall20 : REAL;
+	leftWall25 : REAL;
+	leftWall30 : REAL;
+	leftWall5 : REAL;
+	racingLine0 : REAL;
+	racingLine10 : REAL;
+	racingLine15 : REAL;
+	racingLine20 : REAL;
+	racingLine25 : REAL;
+	racingLine30 : REAL;
+	racingLine5 : REAL;
+	rightWall0 : REAL;
+	rightWall10 : REAL;
+	rightWall15 : REAL;
+	rightWall20 : REAL;
+	rightWall25 : REAL;
+	rightWall30 : REAL;
+	rightWall5 : REAL;
+END_VAR
+
+VAR_OUTPUT
+	accelerationAdjustSpeed : REAL;
+	brakeAdjustSpeed : REAL;
+	inputSteering : REAL;
+	steeringAdjustSpeed : REAL;
+END_VAR
+
+FUZZIFY leftWall0
+	TERM inputSteering_leftWall0_13_0 :=  (0.21435031271955296, 0.0) (0.2175243138353468, 1.0) ;
+	TERM inputSteering_leftWall0_16_0 :=  (-8.913323021773769, 1.0) (-8.911688930457156, 0.0) ;
+	TERM inputSteering_leftWall0_22_0 :=  (-1.2458264455591355, 0.0) (-1.2454062213010126, 1.0) ;
+END_FUZZIFY
+
+FUZZIFY leftWall10
+	TERM inputSteering_leftWall10_15_0 :=  (8.469905562258932, 1.0) (8.484032910506455, 0.0) ;
+	TERM inputSteering_leftWall10_22_0 :=  (11.585055323708922, 1.0) (11.588080443269748, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY leftWall15
+	TERM inputSteering_leftWall15_20_0 :=  (-5.298465301470952, 1.0) (-5.29630243131432, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY leftWall20
+	TERM inputSteering_leftWall20_12_0 :=  (-11.560578256215496, 1.0) (-6.309015017440466, 0.0) ;
+	TERM inputSteering_leftWall20_14_0 :=  (-0.5691193436741475, 1.0) (-0.5525795696288424, 0.0) ;
+	TERM inputSteering_leftWall20_5_0 :=  (-9.737347355970451, 0.0) (-9.735960189328507, 1.0) ;
+	TERM inputSteering_leftWall20_8_0 :=  (9.36451451931218, 0.0) (9.37961704764844, 1.0) ;
+END_FUZZIFY
+
+FUZZIFY leftWall25
+	TERM inputSteering_leftWall25_14_0 :=  (-30.775291615800768, 0.0) (-30.712260371904936, 1.0) ;
+	TERM inputSteering_leftWall25_15_0 :=  (5.441374591988163, 1.0) (5.441677662023836, 0.0) ;
+	TERM inputSteering_leftWall25_19_0 :=  (-18.042772444997794, 0.0) (-18.015427453967302, 1.0) ;
+END_FUZZIFY
+
+FUZZIFY leftWall30
+	TERM inputSteering_leftWall30_13_0 :=  (-17.543882633047147, 1.0) (-17.126973544443302, 0.0) ;
+	TERM inputSteering_leftWall30_14_0 :=  (-10.006330332665273, 1.0) (-1.2435156331215111, 0.0) ;
+	TERM inputSteering_leftWall30_16_0 :=  (-18.124433145738863, 1.0) (-18.123981395287025, 0.0) ;
+	TERM inputSteering_leftWall30_19_0 :=  (-0.7445040676601788, 1.0) (-0.7442865383790033, 0.0) ;
+	TERM inputSteering_leftWall30_2_0 :=  (-22.937279367048877, 0.0) (157.68313510504282, 1.0) ;
+	TERM inputSteering_leftWall30_4_0 :=  (8.884712294277904, 1.0) (14.075183405936478, 0.0) ;
+	TERM inputSteering_leftWall30_6_0 :=  (14.476335527271548, 1.0) (14.490519283889894, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY leftWall5
+	TERM inputSteering_leftWall5_22_0 :=  (-1.2130455765248005, 1.0) (-1.178462423551237, 0.0) ;
+	TERM inputSteering_leftWall5_22_1 :=  (-3.256857688657602, 0.0) (-3.253523124907961, 1.0) ;
+	TERM inputSteering_leftWall5_5_0 :=  (10.59454706779484, 0.0) (10.597633618042362, 1.0) ;
+END_FUZZIFY
+
+FUZZIFY racingLine0
+	TERM inputSteering_racingLine0_14_0 :=  (-10.940100701365248, 0.0) (-10.937486643990919, 1.0) ;
+	TERM inputSteering_racingLine0_17_0 :=  (-20.39285815946574, 0.0) (3.3330528515629467, 1.0) ;
+	TERM inputSteering_racingLine0_19_0 :=  (4.735297076324696, 0.0) (4.740518014572567, 1.0) ;
+	TERM inputSteering_racingLine0_20_0 :=  (-12.42067995054475, 1.0) (-12.413204268179543, 0.0) ;
+	TERM inputSteering_racingLine0_20_1 :=  (-9.118196073989797, 0.0) (-9.093825166842775, 1.0) ;
+	TERM inputSteering_racingLine0_7_0 :=  (-4.154357046909332, 1.0) (1.1404705261407182, 0.0) ;
+	TERM inputSteering_racingLine0_7_1 :=  (2.06200304278242, 0.0) (2.062372560930207, 1.0) ;
+END_FUZZIFY
+
+FUZZIFY racingLine10
+	TERM inputSteering_racingLine10_10_0 :=  (5.9813502530409455, 1.0) (5.981848495207738, 0.0) ;
+	TERM inputSteering_racingLine10_13_0 :=  (-14.068979378451846, 1.0) (-14.060870151768398, 0.0) ;
+	TERM inputSteering_racingLine10_14_0 :=  (4.703770217053922, 1.0) (4.709189438685513, 0.0) ;
+	TERM inputSteering_racingLine10_16_0 :=  (11.179837866725393, 1.0) (11.206594858321756, 0.0) ;
+	TERM inputSteering_racingLine10_18_0 :=  (-16.188605457722694, 1.0) (-16.18802415195773, 0.0) ;
+	TERM inputSteering_racingLine10_19_0 :=  (4.288642540363845, 1.0) (4.295094051130723, 0.0) ;
+	TERM inputSteering_racingLine10_22_0 :=  (-5.080256456613274, 1.0) (-4.810670936209245, 0.0) ;
+	TERM inputSteering_racingLine10_22_1 :=  (-1.8878353646350012, 0.0) (-1.8801117895609971, 1.0) ;
+	TERM inputSteering_racingLine10_2_0 :=  (13.85655403752267, 1.0) (13.856968416496867, 0.0) ;
+	TERM inputSteering_racingLine10_9_0 :=  (-11.573718605742236, 1.0) (-11.572815423157797, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY racingLine15
+	TERM inputSteering_racingLine15_0_0 :=  (1.8510915497756821, 1.0) (1.853685691102035, 0.0) ;
+	TERM inputSteering_racingLine15_10_0 :=  (-2.128249583652271, 1.0) (-2.1276673948117675, 0.0) ;
+	TERM inputSteering_racingLine15_11_0 :=  (-16.33322537253398, 1.0) (-16.312402192086466, 0.0) ;
+	TERM inputSteering_racingLine15_12_0 :=  (-1.814731209092332, 1.0) (-1.8120489198058125, 0.0) ;
+	TERM inputSteering_racingLine15_13_0 :=  (-7.31641184829797, 1.0) (-7.315912367898024, 0.0) ;
+	TERM inputSteering_racingLine15_14_0 :=  (-11.119655210890564, 1.0) (-11.118667518787447, 0.0) ;
+	TERM inputSteering_racingLine15_15_0 :=  (5.191338052968726, 1.0) (5.191408576316246, 0.0) ;
+	TERM inputSteering_racingLine15_16_0 :=  (6.741872071970246, 1.0) (6.7425157707494945, 0.0) ;
+	TERM inputSteering_racingLine15_17_0 :=  (-10.858709211233878, 1.0) (-10.858572174796532, 0.0) ;
+	TERM inputSteering_racingLine15_18_0 :=  (-3.0933745629999447, 1.0) (-3.0919776026735994, 0.0) ;
+	TERM inputSteering_racingLine15_19_0 :=  (-9.324756429820003, 1.0) (-9.323230072228897, 0.0) ;
+	TERM inputSteering_racingLine15_1_0 :=  (7.9829315836526975, 1.0) (7.983938565283277, 0.0) ;
+	TERM inputSteering_racingLine15_20_0 :=  (13.226549547563964, 1.0) (13.23077802659649, 0.0) ;
+	TERM inputSteering_racingLine15_21_0 :=  (-8.598764086948279, 1.0) (-8.437587299875766, 0.0) ;
+	TERM inputSteering_racingLine15_22_0 :=  (4.263149714740352, 1.0) (4.2641149700743775, 0.0) ;
+	TERM inputSteering_racingLine15_3_0 :=  (-1.7159388622404088, 0.0) (-1.7158603068787317, 1.0) ;
+	TERM inputSteering_racingLine15_4_0 :=  (4.283325485896125, 0.0) (4.538632028023179, 1.0) ;
+	TERM inputSteering_racingLine15_5_0 :=  (-1.6077123379137057, 0.0) (-1.5718169969874427, 1.0) ;
+	TERM inputSteering_racingLine15_6_0 :=  (6.110079424814659, 0.0) (6.11264773722595, 1.0) ;
+	TERM inputSteering_racingLine15_7_0 :=  (-9.961401681035904, 0.0) (-9.959217007145243, 1.0) ;
+	TERM inputSteering_racingLine15_8_0 :=  (16.242975271310147, 0.0) (16.26480112957337, 1.0) ;
+	TERM inputSteering_racingLine15_9_0 :=  (-14.767179148042501, 1.0) (-14.766981082816404, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY racingLine20
+	TERM inputSteering_racingLine20_10_0 :=  (-20.496017916143856, 1.0) (-20.28887065059599, 0.0) ;
+	TERM inputSteering_racingLine20_17_0 :=  (-0.7031218320349275, 1.0) (-0.6993979268349646, 0.0) ;
+	TERM inputSteering_racingLine20_22_0 :=  (-10.069897282376107, 1.0) (-10.068024535353405, 0.0) ;
+	TERM inputSteering_racingLine20_4_0 :=  (9.650157311815567, 0.0) (9.670625401255341, 1.0) ;
+	TERM inputSteering_racingLine20_9_0 :=  (-5.694608849042875, 1.0) (-5.495802336246434, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY racingLine25
+	TERM inputSteering_racingLine25_16_0 :=  (-10.282501869482655, 1.0) (-10.01719396896114, 0.0) ;
+	TERM inputSteering_racingLine25_19_0 :=  (-1.7417642407037341, 0.0) (-1.654747396527149, 1.0) ;
+END_FUZZIFY
+
+FUZZIFY racingLine30
+	TERM inputSteering_racingLine30_15_0 :=  (-24.63757955621238, 0.0) (-24.263371098904383, 1.0) ;
+	TERM inputSteering_racingLine30_21_0 :=  (-3.908662851019937, 0.0) (-3.8875048196786888, 1.0) ;
+END_FUZZIFY
+
+FUZZIFY racingLine5
+	TERM inputSteering_racingLine5_17_0 :=  (0.23343558934579023, 1.0) (0.23795716849452395, 0.0) ;
+	TERM inputSteering_racingLine5_22_0 :=  (-9.132971244492097, 1.0) (-9.09706258810817, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY rightWall0
+	TERM inputSteering_rightWall0_11_0 :=  (5.939569256151222, 0.0) (5.939964849847434, 1.0) ;
+	TERM inputSteering_rightWall0_15_0 :=  (15.90639669859172, 0.0) (16.150500570738707, 1.0) ;
+	TERM inputSteering_rightWall0_16_0 :=  (0.33218551756795023, 0.0) (0.3942761230668803, 1.0) ;
+	TERM inputSteering_rightWall0_20_0 :=  (11.51286916451053, 0.0) (13.476021977254337, 1.0) ;
+	TERM inputSteering_rightWall0_4_0 :=  (14.361232468256468, 1.0) (14.365773538130023, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY rightWall10
+	TERM inputSteering_rightWall10_17_0 :=  (9.864930216648997, 1.0) (9.915125691345247, 0.0) ;
+	TERM inputSteering_rightWall10_20_0 :=  (7.091125063250516, 1.0) (7.098036200022185, 0.0) ;
+	TERM inputSteering_rightWall10_21_0 :=  (-0.9411585504725235, 1.0) (-0.9406904161391783, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY rightWall15
+	TERM inputSteering_rightWall15_12_0 :=  (7.534039181397707, 1.0) (7.547886444039006, 0.0) ;
+	TERM inputSteering_rightWall15_22_0 :=  (-7.434812072388744, 1.0) (-6.984709553838058, 0.0) ;
+	TERM inputSteering_rightWall15_4_0 :=  (9.640471771925142, 0.0) (9.643286367356055, 1.0) ;
+END_FUZZIFY
+
+FUZZIFY rightWall20
+	TERM inputSteering_rightWall20_16_0 :=  (-0.8542851917675032, 1.0) (-0.8282156251188603, 0.0) ;
+	TERM inputSteering_rightWall20_18_0 :=  (21.77893995421528, 1.0) (21.811840470339835, 0.0) ;
+	TERM inputSteering_rightWall20_1_0 :=  (3.330221552979051, 1.0) (84.76260619720931, 0.0) ;
+	TERM inputSteering_rightWall20_21_0 :=  (-2.037873142001475, 1.0) (5.375615909597839, 0.0) ;
+	TERM inputSteering_rightWall20_22_0 :=  (11.528015680337367, 0.0) (11.542671083478174, 1.0) ;
+	TERM inputSteering_rightWall20_5_0 :=  (-2.172162549025151, 0.0) (-2.1720119863385556, 1.0) ;
+	TERM inputSteering_rightWall20_5_1 :=  (7.745679292803802, 1.0) (7.751045461176629, 0.0) ;
+	TERM inputSteering_rightWall20_6_0 :=  (1.7741984410982807, 0.0) (1.7769458410095351, 1.0) ;
+	TERM inputSteering_rightWall20_7_0 :=  (27.158272268535097, 0.0) (27.163369279145204, 1.0) ;
+	TERM inputSteering_rightWall20_8_0 :=  (5.67960994692328, 0.0) (6.215043219786165, 1.0) ;
+	TERM inputSteering_rightWall20_8_1 :=  (15.09268789163728, 1.0) (15.180239087682027, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY rightWall25
+	TERM inputSteering_rightWall25_18_0 :=  (-1.7425980561693564, 0.0) (-1.7334547912486968, 1.0) ;
+END_FUZZIFY
+
+FUZZIFY rightWall30
+	TERM inputSteering_rightWall30_15_0 :=  (7.706705368156883, 0.0) (8.142496050145068, 1.0) ;
+	TERM inputSteering_rightWall30_18_0 :=  (0.5270771852554579, 1.0) (0.5301477446068513, 0.0) ;
+	TERM inputSteering_rightWall30_19_0 :=  (4.871716903414891, 1.0) (4.872589140299728, 0.0) ;
+	TERM inputSteering_rightWall30_20_0 :=  (17.639979987667594, 1.0) (20.796115404892166, 0.0) ;
+	TERM inputSteering_rightWall30_20_1 :=  (-2.0583027949471826, 0.0) (-1.6426060549872488, 1.0) ;
+	TERM inputSteering_rightWall30_22_0 :=  (5.614832640847041, 1.0) (7.158332035061219, 0.0) ;
+	TERM inputSteering_rightWall30_8_0 :=  (15.76376261668959, 1.0) (15.773395054919925, 0.0) ;
+END_FUZZIFY
+
+FUZZIFY rightWall5
+	TERM inputSteering_rightWall5_13_0 :=  (-2.6627785232251977, 1.0) (-2.6600561208192413, 0.0) ;
+	TERM inputSteering_rightWall5_20_0 :=  (22.971635141105892, 0.0) (22.992167760029947, 1.0) ;
+END_FUZZIFY
+
+DEFUZZIFY accelerationAdjustSpeed
+	METHOD : COGS;
+	DEFAULT := 0.09069816563603295;
+	RANGE := (0.025831792854489586 .. 0.025831792854489586);
+END_DEFUZZIFY
+
+DEFUZZIFY brakeAdjustSpeed
+	METHOD : COGS;
+	DEFAULT := 0.08130679142193203;
+	RANGE := (0.13594916546844146 .. 0.13594916546844146);
+END_DEFUZZIFY
+
+DEFUZZIFY inputSteering
+	TERM s0 :=  0.0;
+	TERM s1 :=  1.0;
+	TERM s_1 :=  -1.0;
+	METHOD : COGS;
+	DEFAULT := 999.0;
+	RANGE := (-1.0 .. 1.0);
+END_DEFUZZIFY
+
+DEFUZZIFY steeringAdjustSpeed
+	METHOD : COGS;
+	DEFAULT := 0.016050538787411053;
+	RANGE := (0.10015053334596909 .. 0.10015053334596909);
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	ACT : MIN;
+	ACCU : MAX;
+	AND : PROD;
+	RULE 0 : IF racingLine15 IS inputSteering_racingLine15_0_0 THEN inputSteering IS s0 WITH 0.5729704445191326;
+	RULE 1 : IF (racingLine15 IS inputSteering_racingLine15_1_0) AND (rightWall20 IS inputSteering_rightWall20_1_0) THEN inputSteering IS s0 WITH 0.5547218316826261;
+	RULE 2 : IF (racingLine10 IS inputSteering_racingLine10_2_0) AND (leftWall30 IS inputSteering_leftWall30_2_0) THEN inputSteering IS s0 WITH 0.33718412509441764;
+	RULE 3 : IF racingLine15 IS inputSteering_racingLine15_3_0 THEN inputSteering IS s_1 WITH 0.6110117494916424;
+	RULE 4 : IF ((((racingLine15 IS inputSteering_racingLine15_4_0) AND (rightWall15 IS inputSteering_rightWall15_4_0)) AND (rightWall0 IS inputSteering_rightWall0_4_0)) AND (leftWall30 IS inputSteering_leftWall30_4_0)) AND (racingLine20 IS inputSteering_racingLine20_4_0) THEN inputSteering IS s_1 WITH 0.6872565448785208;
+	RULE 5 : IF ((((racingLine15 IS inputSteering_racingLine15_5_0) AND (rightWall20 IS inputSteering_rightWall20_5_0)) AND (leftWall20 IS inputSteering_leftWall20_5_0)) AND (leftWall5 IS inputSteering_leftWall5_5_0)) AND (rightWall20 IS inputSteering_rightWall20_5_1) THEN inputSteering IS s_1 WITH 0.12408093659516817;
+	RULE 6 : IF ((racingLine15 IS inputSteering_racingLine15_6_0) AND (rightWall20 IS inputSteering_rightWall20_6_0)) AND (leftWall30 IS inputSteering_leftWall30_6_0) THEN inputSteering IS s_1 WITH 0.29469634836584024;
+	RULE 7 : IF (((racingLine15 IS inputSteering_racingLine15_7_0) AND (rightWall20 IS inputSteering_rightWall20_7_0)) AND (racingLine0 IS inputSteering_racingLine0_7_0)) AND (racingLine0 IS inputSteering_racingLine0_7_1) THEN inputSteering IS s_1 WITH 0.6364647264121173;
+	RULE 8 : IF ((((racingLine15 IS inputSteering_racingLine15_8_0) AND (rightWall20 IS inputSteering_rightWall20_8_0)) AND (rightWall20 IS inputSteering_rightWall20_8_1)) AND (leftWall20 IS inputSteering_leftWall20_8_0)) AND (rightWall30 IS inputSteering_rightWall30_8_0) THEN inputSteering IS s_1 WITH 0.7715366349707389;
+	RULE 9 : IF ((racingLine15 IS inputSteering_racingLine15_9_0) AND (racingLine20 IS inputSteering_racingLine20_9_0)) AND (racingLine10 IS inputSteering_racingLine10_9_0) THEN inputSteering IS s1 WITH 0.8912017780982219;
+	RULE 10 : IF ((racingLine15 IS inputSteering_racingLine15_10_0) AND (racingLine20 IS inputSteering_racingLine20_10_0)) AND (racingLine10 IS inputSteering_racingLine10_10_0) THEN inputSteering IS s1 WITH 0.8680112729692337;
+	RULE 11 : IF (racingLine15 IS inputSteering_racingLine15_11_0) AND (rightWall0 IS inputSteering_rightWall0_11_0) THEN inputSteering IS s1 WITH 0.4859571945902725;
+	RULE 12 : IF ((racingLine15 IS inputSteering_racingLine15_12_0) AND (leftWall20 IS inputSteering_leftWall20_12_0)) AND (rightWall15 IS inputSteering_rightWall15_12_0) THEN inputSteering IS s1 WITH 0.6583591751745344;
+	RULE 13 : IF ((((racingLine15 IS inputSteering_racingLine15_13_0) AND (leftWall30 IS inputSteering_leftWall30_13_0)) AND (racingLine10 IS inputSteering_racingLine10_13_0)) AND (rightWall5 IS inputSteering_rightWall5_13_0)) AND (leftWall0 IS inputSteering_leftWall0_13_0) THEN inputSteering IS s1 WITH 0.7424131872505388;
+	RULE 14 : IF (((((racingLine15 IS inputSteering_racingLine15_14_0) AND (leftWall30 IS inputSteering_leftWall30_14_0)) AND (racingLine10 IS inputSteering_racingLine10_14_0)) AND (racingLine0 IS inputSteering_racingLine0_14_0)) AND (leftWall20 IS inputSteering_leftWall20_14_0)) AND (leftWall25 IS inputSteering_leftWall25_14_0) THEN inputSteering IS s1 WITH 0.4708892666574087;
+	RULE 15 : IF (((((racingLine15 IS inputSteering_racingLine15_15_0) AND (rightWall0 IS inputSteering_rightWall0_15_0)) AND (leftWall10 IS inputSteering_leftWall10_15_0)) AND (rightWall30 IS inputSteering_rightWall30_15_0)) AND (racingLine30 IS inputSteering_racingLine30_15_0)) AND (leftWall25 IS inputSteering_leftWall25_15_0) THEN inputSteering IS s1 WITH 0.6404255461686165;
+	RULE 16 : IF ((((((racingLine15 IS inputSteering_racingLine15_16_0) AND (leftWall30 IS inputSteering_leftWall30_16_0)) AND (racingLine10 IS inputSteering_racingLine10_16_0)) AND (rightWall20 IS inputSteering_rightWall20_16_0)) AND (leftWall0 IS inputSteering_leftWall0_16_0)) AND (racingLine25 IS inputSteering_racingLine25_16_0)) AND (rightWall0 IS inputSteering_rightWall0_16_0) THEN inputSteering IS s1 WITH 0.797442639619239;
+	RULE 17 : IF ((((racingLine15 IS inputSteering_racingLine15_17_0) AND (racingLine0 IS inputSteering_racingLine0_17_0)) AND (racingLine5 IS inputSteering_racingLine5_17_0)) AND (racingLine20 IS inputSteering_racingLine20_17_0)) AND (rightWall10 IS inputSteering_rightWall10_17_0) THEN inputSteering IS s1 WITH 0.13596064270917363;
+	RULE 18 : IF ((((racingLine15 IS inputSteering_racingLine15_18_0) AND (rightWall30 IS inputSteering_rightWall30_18_0)) AND (racingLine10 IS inputSteering_racingLine10_18_0)) AND (rightWall25 IS inputSteering_rightWall25_18_0)) AND (rightWall20 IS inputSteering_rightWall20_18_0) THEN inputSteering IS s1 WITH 0.6536084372234171;
+	RULE 19 : IF ((((((racingLine15 IS inputSteering_racingLine15_19_0) AND (leftWall30 IS inputSteering_leftWall30_19_0)) AND (racingLine10 IS inputSteering_racingLine10_19_0)) AND (racingLine0 IS inputSteering_racingLine0_19_0)) AND (racingLine25 IS inputSteering_racingLine25_19_0)) AND (leftWall25 IS inputSteering_leftWall25_19_0)) AND (rightWall30 IS inputSteering_rightWall30_19_0) THEN inputSteering IS s1 WITH 0.5392283620958689;
+	RULE 20 : IF ((((((((racingLine15 IS inputSteering_racingLine15_20_0) AND (rightWall30 IS inputSteering_rightWall30_20_0)) AND (leftWall15 IS inputSteering_leftWall15_20_0)) AND (rightWall0 IS inputSteering_rightWall0_20_0)) AND (rightWall30 IS inputSteering_rightWall30_20_1)) AND (racingLine0 IS inputSteering_racingLine0_20_0)) AND (racingLine0 IS inputSteering_racingLine0_20_1)) AND (rightWall5 IS inputSteering_rightWall5_20_0)) AND (rightWall10 IS inputSteering_rightWall10_20_0) THEN inputSteering IS s1 WITH 0.6733123595099024;
+	RULE 21 : IF (((racingLine15 IS inputSteering_racingLine15_21_0) AND (rightWall20 IS inputSteering_rightWall20_21_0)) AND (racingLine30 IS inputSteering_racingLine30_21_0)) AND (rightWall10 IS inputSteering_rightWall10_21_0) THEN inputSteering IS s1 WITH 0.5949876941257266;
+	RULE 22 : IF (((((((((((racingLine20 IS inputSteering_racingLine20_22_0) AND (racingLine15 IS inputSteering_racingLine15_22_0)) AND (leftWall0 IS inputSteering_leftWall0_22_0)) AND (leftWall10 IS inputSteering_leftWall10_22_0)) AND (racingLine10 IS inputSteering_racingLine10_22_0)) AND (rightWall20 IS inputSteering_rightWall20_22_0)) AND (rightWall15 IS inputSteering_rightWall15_22_0)) AND (rightWall30 IS inputSteering_rightWall30_22_0)) AND (leftWall5 IS inputSteering_leftWall5_22_0)) AND (racingLine5 IS inputSteering_racingLine5_22_0)) AND (leftWall5 IS inputSteering_leftWall5_22_1)) AND (racingLine10 IS inputSteering_racingLine10_22_1) THEN inputSteering IS s1 WITH 0.25539296062258215;
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
+
