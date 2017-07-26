@@ -10,5 +10,5 @@ public class Consts {
     public static double maxDamage = 40.0f;
     public static double trackCompletedBonus = 10.0f;
     public static double trackNotCompletedBonus = 0.1f;
-    public static double safeDistance = 1.15f;
+    public static double safeDistance = 1.0f;
 }
