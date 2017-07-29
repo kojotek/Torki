@@ -70,9 +70,12 @@ public class GeneticAlgorithm {
     public GeneticAlgorithm(FIS workingFis, String fileName) throws InvalidConfigurationException, FileNotFoundException, ParserConfigurationException, ImproperXMLException, UnsupportedRepresentationException, GeneCreationException, SAXException, IOException {
         conf = new DefaultConfiguration();
         conf.removeNaturalSelectors(false);
-        conf.addNaturalSelector(new BestChromosomesSelector(conf, 0.2), false);
+        BestChromosomesSelector bcs = new BestChromosomesSelector(conf, 0.9);
+        bcs.setDoubletteChromosomesAllowed(true);
+        conf.addNaturalSelector(bcs, false);
         fitFunc = new TorcsFitnessFunction(workingFis, fileName);
         conf.setFitnessFunction(fitFunc);
+        conf.setPreservFittestIndividual(true);
         
         sampleGenes = new Gene[fitFunc.genesForTerms + fitFunc.rulesCount + 3];
         
