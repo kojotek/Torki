@@ -103,7 +103,7 @@ public class padDriver extends Controller {
     
     double currentFrameTime, lastFrameTime;
     
-    //Visualisation visualisation;
+    Visualisation visualisation;
     
     DecimalFormat doubleFormatter;  
     
@@ -1091,7 +1091,7 @@ public class padDriver extends Controller {
             double safeDistanceAverage = safeDistanceFromEdgeSum/counter;
 
 
-            double score = distanceRaced * (1.0f/racingLineAverageDist) * (trackCompleted) * Math.pow(safeDistanceAverage, 10.0f);
+            double score = (distanceRaced + distanceRaced * (1.0 - racingLineAverageDist) + distanceRaced * Math.pow(safeDistanceAverage, 10.0f)) * trackCompleted;
 
             geneticAlg.fitFunc.score = Math.max(score, 0.0f);
 
@@ -1109,10 +1109,10 @@ public class padDriver extends Controller {
 
                 raceFinished = true;
                 
-                System.err.println("score = distanceRaced * (1.0f/racingLineAverageDist) * (trackCompleted) * safeDistanceAverage ^ 10");
+                System.err.println("score = (distanceRaced + distanceRaced * (1.0 - racingLineAverageDist) + distanceRaced * Math.pow(safeDistanceAverage, 10.0f)) * trackCompleted");
                 System.err.println("distanceRaced: " + distanceRaced);
-                System.err.println("racingLineAverageDist: " + racingLineAverageDist);
-                System.err.println("safeDistanceAverage ^ 10: " + (Math.pow(safeDistanceAverage, 10.0f)));
+                System.err.println("distanceRaced * (1.0 - racingLineAverageDist): " + distanceRaced * (1.0 - racingLineAverageDist));
+                System.err.println("distanceRaced * Math.pow(safeDistanceAverage, 10.0f): " + distanceRaced * Math.pow(safeDistanceAverage, 10.0f));
                 System.err.println("trackCompleted: " + trackCompleted);
 
 
@@ -1348,7 +1348,11 @@ public class padDriver extends Controller {
             {
                 padDriver.generationNumber = i;
                 
+                System.err.println("");
+                System.err.println("**********************************");
                 System.err.println("Generation " + Integer.toString(i));
+                System.err.println("**********************************");
+                System.err.println("");
                 geneticAlg.genotype.evolve();
                 
                 DataTreeBuilder builder = DataTreeBuilder.getInstance();

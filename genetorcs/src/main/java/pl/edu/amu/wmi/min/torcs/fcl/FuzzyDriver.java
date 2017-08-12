@@ -202,11 +202,11 @@ public class FuzzyDriver extends Controller {
             toReturn.restartRace = true;
             
             if (distanceRaced > bestDistanceSoFar){
-                Gpr.toFile("fcl/robot_best_fit_gen_" + generationNumber + ".fcl", fis.getFunctionBlock(null).toString());
+                Gpr.toFile("genetorki/robot_best_fit_gen_" + generationNumber + ".fcl", fis.getFunctionBlock(null).toString());
                 bestDistanceSoFar = distanceRaced;
             }
             
-            Gpr.toFile("fcl/robots/robot_" + generationNumber + "_unit_" + unitNumber + "_result_" + Math.round(distanceRaced) + ".fcl", fis.getFunctionBlock(null).toString());
+            Gpr.toFile("genetorki/robots/robot_" + generationNumber + "_unit_" + unitNumber + "_result_" + Math.round(distanceRaced) + ".fcl", fis.getFunctionBlock(null).toString());
             
         }
         counter++;

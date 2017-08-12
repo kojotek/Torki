@@ -38,6 +38,7 @@ public class FuzzyDriver extends Controller {
     private  int[] gearDown = {0, 2500, 3000, 3000, 3500, 3500};
     boolean pulse = true;
     
+    double distanceRaced;
     
     
         public FuzzyDriver(FIS fis) {
@@ -59,6 +60,12 @@ public class FuzzyDriver extends Controller {
     
     @Override
     public Action control(SensorModel sensors) {
+        distanceRaced = sensors.getDistanceRaced();
+        
+        if (sensors.getDamage() > 40 || sensors.getTrackEdgeSensors()[9] < -0.1f){
+            System.err.println("distance raced: " + distanceRaced);
+        }
+        
         Action toReturn = new Action();
 
         // Set the input
@@ -216,13 +223,13 @@ public class FuzzyDriver extends Controller {
     
     @Override
     public void reset() {
-        System.out.println("Restarting the race!");
+        System.err.println("distance raced: " + distanceRaced);
         
     }
     
     @Override
     public void shutdown() {
-        System.out.println("Bye bye!");
+        System.err.println("distance raced: " + distanceRaced);
     }
     
     @Override

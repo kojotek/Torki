@@ -153,7 +153,7 @@ public class GeneticAl {
         else{
             starGen = Integer.parseInt(file.replace(".xml", ""));
             starGen = starGen + 1;
-            Reader documentReader = new FileReader( "fcl/generations/" + file );
+            Reader documentReader = new FileReader( "genetorki/generations/" + file );
             InputSource documentSource = new InputSource( documentReader );
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document genotypeDocument = builder.parse( documentSource );
