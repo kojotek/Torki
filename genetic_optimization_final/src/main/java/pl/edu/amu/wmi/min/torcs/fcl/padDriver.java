@@ -121,7 +121,7 @@ public class padDriver extends Controller {
         sym.setDecimalSeparator('.');
         doubleFormatter.setDecimalFormatSymbols(sym);
 
-        //visualisation = new Visualisation();
+        visualisation = new Visualisation();
         
         toReturn = new Action();
         emptyAction = new Action();
@@ -340,7 +340,7 @@ public class padDriver extends Controller {
 
                 if(leftPoints.size() >= 2){
                     double lastPointAngle = -Math.atan2(leftPoints.get(leftPoints.size()-1).y - leftPoints.get(leftPoints.size()-2).y,
-                            leftPoints.get(leftPoints.size()-1).x - leftPoints.get(leftPoints.size()-2).x);
+                    leftPoints.get(leftPoints.size()-1).x - leftPoints.get(leftPoints.size()-2).x);
                     Point2D.Double lastPoint = new Point2D.Double();
                     lastPoint.x = -roadWidth * Math.sin(lastPointAngle) + leftPoints.get(leftPoints.size()-1).x;
                     lastPoint.y = -roadWidth * Math.cos(lastPointAngle) + leftPoints.get(leftPoints.size()-1).y;
@@ -363,9 +363,9 @@ public class padDriver extends Controller {
                 rightPoints = ChangeLineResoultion(rightPoints, 2.0f);
 
                 if(rightPoints.size() >= 2){
-                    double firstPointAngle = -Math.atan2(rightPoints.get(1).y - rightPoints.get(0).y,
-                        rightPoints.get(1).x - rightPoints.get(0).x);
+                    double firstPointAngle = -Math.atan2(rightPoints.get(1).y - rightPoints.get(0).y, rightPoints.get(1).x - rightPoints.get(0).x);
                     Point2D.Double firstPoint = new Point2D.Double();
+                    
                     firstPoint.x = roadWidth * Math.sin(firstPointAngle) + rightPoints.get(0).x;
                     firstPoint.y = roadWidth * Math.cos(firstPointAngle) + rightPoints.get(0).y;
 
@@ -499,12 +499,6 @@ public class padDriver extends Controller {
             //setting up a racing line
             if(leftPoints.size() == rightPoints.size()){
 
-                /*
-                if (!leftPoints.isEmpty()){
-                    previousCenterOfPointX = (rightPoints.get(0).x + leftPoints.get(0).x) / 2.0f;
-                    previousCenterOfPointY = (rightPoints.get(0).y + leftPoints.get(0).y) / 2.0f;
-                }
-                */
                 previousCenterOfPointX = centerLinePoints.get(0).x;
                 previousCenterOfPointY = centerLinePoints.get(0).y;
 
@@ -543,7 +537,7 @@ public class padDriver extends Controller {
             double meanCurve = 0.0f;
 
 
-            //visualisation.Redraw(leftPoints, rightPoints, racingLinePoints);     
+            visualisation.Redraw(leftPoints, rightPoints, racingLinePoints);     
 
 
             double angle = sensors.getAngleToTrackAxis() * (180.0f/Math.PI);

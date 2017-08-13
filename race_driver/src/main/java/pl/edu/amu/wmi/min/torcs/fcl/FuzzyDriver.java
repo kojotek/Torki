@@ -4,18 +4,11 @@ import net.sourceforge.cig.torcs.Controller;
 import net.sourceforge.cig.torcs.Action;
 import net.sourceforge.cig.torcs.SensorModel;
 import java.awt.geom.Point2D;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Set;
-import javax.xml.parsers.ParserConfigurationException;
 import net.sourceforge.jFuzzyLogic.FIS;
-import org.jgap.InvalidConfigurationException;
-import org.jgap.UnsupportedRepresentationException;
-import org.jgap.xml.GeneCreationException;
-import org.jgap.xml.ImproperXMLException;
-import org.xml.sax.SAXException;
 
 public class FuzzyDriver extends Controller {
     
@@ -32,11 +25,14 @@ public class FuzzyDriver extends Controller {
     
     boolean useVisualisation = false;
     
+    int raceNumber = 1;
     private Double trackLength;
     double roadWidth = 0.0f;
     double framesCounter = 0.0f;
-    double distancesFromRacingLineSum = 0.0f;
-    double squareDistancesFromRacingLineSum = 0.0f;
+    double relativeDistancesFromRacingLineSum = 0.0f;
+    double relativeSquareDistancesFromRacingLineSum = 0.0f;
+    double actualDistancesFromRacingLineSum = 0.0f;
+    double actualSquaredDistancesFromRacingLineSum = 0.0f;
     double safeDistanceFromEdgeSum = 0.0f;
     int lapsDone = 0;
     Set<String> variablesInUseSteering;
@@ -53,7 +49,7 @@ public class FuzzyDriver extends Controller {
     double leftLength = 0.0f;
     double rightLength = 0.0f;
     double distanceFromStartLine;
-    double bestLapTime = Double.MAX_VALUE;
+    double bestLapTime = 0.0f;
     
     RacingLine racingLine;
     GearPreference gearPreference;
@@ -106,7 +102,7 @@ public class FuzzyDriver extends Controller {
             visualisation = new Visualisation();
         }
         
-        
+        /*
         System.out.println(""
                 + "track0,track1,track2,"
                 + "track3,track4,track5,"
@@ -144,7 +140,7 @@ public class FuzzyDriver extends Controller {
                 + "gas,"
                 + "brake,"
         );
-
+*/
     }
     
     
@@ -174,9 +170,6 @@ public class FuzzyDriver extends Controller {
             }
 
             //trying to realize, which point belongs to which band
-
-            
-            
             for (int i = 0; i < points.size(); i++) {
                 if(trackEdge[i] < 199.9f && (i == 0 || Point2D.distance(points.get(i).x, points.get(i).y, points.get(i-1).x, points.get(i-1).y) <= roadWidth * 1.5f)){
                     leftPoints.add(points.get(i));
@@ -211,25 +204,31 @@ public class FuzzyDriver extends Controller {
             ArrayList<Point2D.Double> estimatedSet = new ArrayList<>();
 
 
-            //estimating shorter side
+            //estimating shorter edge
             ArrayList<Point2D.Double> longerEdge;
+            
+            float castingDirection = 0;
             
             if(leftEdgeLonger){
                 leftPoints = ChangeLineResoultion(leftPoints, 2.0f);
                 longerEdge = leftPoints;
+                castingDirection = -1;
             }
             else{
                 rightPoints = ChangeLineResoultion(rightPoints, 2.0f);
                 longerEdge = rightPoints;
+                castingDirection = 1;
             }
 
             
             if(longerEdge.size() >= 2){
                 double firstPointAngle = -Math.atan2(longerEdge.get(1).y - longerEdge.get(0).y, longerEdge.get(1).x - longerEdge.get(0).x);
                 Point2D.Double firstPoint = new Point2D.Double();
-                firstPoint.x = -roadWidth * Math.sin(firstPointAngle) + longerEdge.get(0).x;
-                firstPoint.y = -roadWidth * Math.cos(firstPointAngle) + longerEdge.get(0).y;
 
+                firstPoint.x = castingDirection * roadWidth * Math.sin(firstPointAngle) + longerEdge.get(0).x;
+                firstPoint.y = castingDirection * roadWidth * Math.cos(firstPointAngle) + longerEdge.get(0).y;
+
+                
                 estimatedSet.add(firstPoint);
             }
 
@@ -238,23 +237,25 @@ public class FuzzyDriver extends Controller {
                 Point2D.Double oppositePoint = new Point2D.Double();
 
                 double bisectorAngle;
+                
                 double ab = Math.atan2(longerEdge.get(i+1).y - longerEdge.get(i).y, longerEdge.get(i+1).x - longerEdge.get(i).x);
                 double bc = Math.atan2(longerEdge.get(i).y - longerEdge.get(i-1).y, longerEdge.get(i).x - longerEdge.get(i-1).x);
                 bisectorAngle = (ab + bc) / 2.0f;
                 bisectorAngle = -bisectorAngle;
 
-                oppositePoint.x = -roadWidth * Math.sin(bisectorAngle) + longerEdge.get(i).x;
-                oppositePoint.y = -roadWidth * Math.cos(bisectorAngle) + longerEdge.get(i).y;
+                oppositePoint.x = castingDirection * roadWidth * Math.sin(bisectorAngle) + longerEdge.get(i).x;
+                oppositePoint.y = castingDirection * roadWidth * Math.cos(bisectorAngle) + longerEdge.get(i).y;
 
                 estimatedSet.add(oppositePoint);
             }
 
             if(longerEdge.size() >= 2){
                 double lastPointAngle = -Math.atan2(longerEdge.get(longerEdge.size()-1).y - longerEdge.get(longerEdge.size()-2).y,
-                        longerEdge.get(longerEdge.size()-1).x - longerEdge.get(longerEdge.size()-2).x);
+                longerEdge.get(longerEdge.size()-1).x - longerEdge.get(longerEdge.size()-2).x);
                 Point2D.Double lastPoint = new Point2D.Double();
-                lastPoint.x = -roadWidth * Math.sin(lastPointAngle) + longerEdge.get(longerEdge.size()-1).x;
-                lastPoint.y = -roadWidth * Math.cos(lastPointAngle) + longerEdge.get(longerEdge.size()-1).y;
+                
+                lastPoint.x = castingDirection * roadWidth * Math.sin(lastPointAngle) + longerEdge.get(longerEdge.size()-1).x;
+                lastPoint.y = castingDirection * roadWidth * Math.cos(lastPointAngle) + longerEdge.get(longerEdge.size()-1).y;
 
                 estimatedSet.add(lastPoint);
             }
@@ -282,8 +283,8 @@ public class FuzzyDriver extends Controller {
             double previousCenterOfPointX = 0.0f;
             double previousCenterOfPointY = 0.0f;
 
-            double distanceFromRacingLine = sensors.getTrackPosition() - racingLine.GetFirstPointAfter(distanceFromStartLine);
-            double actualDistanceFromRacingLine = distanceFromRacingLine * (roadWidth/2.0f);
+            double relativeDistanceFromRacingLine = sensors.getTrackPosition() - racingLine.GetFirstPointAfter(distanceFromStartLine);
+            double actualDistanceFromRacingLine = relativeDistanceFromRacingLine * (roadWidth/2.0f);
 
             double radAngle = sensors.getAngleToTrackAxis();
             double distanceToTrackCenter = sensors.getTrackPosition() * (roadWidth/2.0f);
@@ -514,18 +515,30 @@ public class FuzzyDriver extends Controller {
             lapsDone = (int)Math.floor(distanceRaced/trackLength);
 
             double trackCompleted = (lapsDone >= (Consts.lapsPerCandidate) ? Consts.trackCompletedBonus : Consts.trackNotCompletedBonus);
-            distancesFromRacingLineSum += Math.abs(distanceFromRacingLine);
-            squareDistancesFromRacingLineSum += (distanceFromRacingLine * distanceFromRacingLine);
+            relativeDistancesFromRacingLineSum += Math.abs(relativeDistanceFromRacingLine);
+            relativeSquareDistancesFromRacingLineSum += (relativeDistanceFromRacingLine * relativeDistanceFromRacingLine);
+            actualDistancesFromRacingLineSum += Math.abs(actualDistanceFromRacingLine);
+            actualSquaredDistancesFromRacingLineSum += actualDistanceFromRacingLine * actualDistanceFromRacingLine;
             if(minTrackEdge > Consts.safeDistance){
                 safeDistanceFromEdgeSum += 1.0f;
             }
 
-            double racingLineAverageSquaredDist = squareDistancesFromRacingLineSum/framesCounter;
-            double racingLineAverageDist = distancesFromRacingLineSum/framesCounter;  
+
+            double racingLineAverageDist = relativeDistancesFromRacingLineSum/framesCounter;            
+            double racingLineAverageSquaredDist = relativeSquareDistancesFromRacingLineSum/framesCounter;
+            double actualRacingLineAverageDist = actualDistancesFromRacingLineSum/framesCounter;
+            double actualRacingLineAverageSquaredDist = actualSquaredDistancesFromRacingLineSum/framesCounter;
             double safeDistanceAverage = safeDistanceFromEdgeSum/framesCounter;
 
             double score = (distanceRaced + distanceRaced * (1.0 - racingLineAverageSquaredDist) + distanceRaced * Math.pow(safeDistanceAverage, 10.0f)) * trackCompleted;
 
+            if(sensors.getLastLapTime() == 0.0f){
+                bestLapTime = 0.0f;
+            }
+            else if(sensors.getLastLapTime() > 0.0f && (sensors.getLastLapTime() < bestLapTime || bestLapTime == 0.0f)){
+                bestLapTime = sensors.getLastLapTime();
+            }
+            
             if(sensors.getLastLapTime() > 0.0f && sensors.getLastLapTime() < bestLapTime){
                 bestLapTime = sensors.getLastLapTime();
             }
@@ -533,14 +546,16 @@ public class FuzzyDriver extends Controller {
             if (sensors.getDamage() > Consts.maxDamage || trackEdge[9] <= 0.0f || lapsDone >= Consts.lapsPerCandidate || framesCounter > Consts.maxTicksPerCandidate ){
                 
                     if(!raceFinished){
-                        System.err.println("score................................... " + doubleFormatter.format(score));
-                        System.err.println("distance raced.......................... " + doubleFormatter.format(distanceRaced));
-                        System.err.println("avg distance from racing line........... " + doubleFormatter.format(racingLineAverageDist));
-                        System.err.println("avg squared distance from racing line... " + doubleFormatter.format(racingLineAverageSquaredDist));
-                        System.err.println("all wheels on the road.................. " + doubleFormatter.format(safeDistanceAverage*100.0f));
-                        System.err.println("laps completed.......................... " + lapsDone);
-                        System.err.println("race completed.......................... " + (lapsDone >= (Consts.lapsPerCandidate) ? "yes" : "no"));
-                        System.err.println("best lap time........................... " + doubleFormatter.format(bestLapTime));
+                        System.err.println("race number " + raceNumber + ":");
+                        System.err.println("  score................................... " + doubleFormatter.format(score));
+                        System.err.println("  distance raced.......................... " + doubleFormatter.format(distanceRaced));
+                        System.err.println("  race end location....................... " + doubleFormatter.format(sensors.getDistanceFromStartLine()));
+                        System.err.println("  avg distance from racing line........... " + doubleFormatter.format(actualRacingLineAverageDist));
+                        System.err.println("  avg squared distance from racing line... " + doubleFormatter.format(actualRacingLineAverageSquaredDist));
+                        System.err.println("  all wheels on the road.................. " + doubleFormatter.format(safeDistanceAverage*100.0f));
+                        System.err.println("  laps completed.......................... " + lapsDone);
+                        System.err.println("  race completed.......................... " + (lapsDone >= (Consts.lapsPerCandidate) ? "yes" : "no"));
+                        System.err.println("  best lap time........................... " + doubleFormatter.format(bestLapTime));
                         System.err.println("");
                     }
                 
@@ -557,6 +572,7 @@ public class FuzzyDriver extends Controller {
     
     @Override
     public void reset() {
+        raceNumber++;
         resetState();
     }
     
@@ -619,8 +635,10 @@ public class FuzzyDriver extends Controller {
     private void resetState(){
         toReturn = new Action();
         framesCounter = 0.0f;
-        distancesFromRacingLineSum = 0.0f;
-        squareDistancesFromRacingLineSum = 0.0f;
+        relativeDistancesFromRacingLineSum = 0.0f;
+        relativeSquareDistancesFromRacingLineSum = 0.0f;
+        actualDistancesFromRacingLineSum = 0.0f;
+        actualSquaredDistancesFromRacingLineSum = 0.0f;
         safeDistanceFromEdgeSum = 0.0f;
         lapsDone = 0;
         firstFrame = true;

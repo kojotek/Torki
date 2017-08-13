@@ -129,9 +129,9 @@ public class Visualisation {
     
     public void Redraw(List<Point2D.Double> leftPoints, List<Point2D.Double> rightPoints, List<Point2D.Double> racingLine){
         if (!paintComponentBusy){
-            dc.leftRoadPoints = leftPoints;
-            dc.rightRoadPoints = rightPoints;
-            dc.racingLine = racingLine;
+            dc.leftRoadPoints = new ArrayList<>(leftPoints);
+            dc.rightRoadPoints = new ArrayList<>(rightPoints);
+            dc.racingLine = new ArrayList<>(racingLine);
             window.repaint();
         }
 

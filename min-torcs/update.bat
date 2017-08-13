@@ -7,3 +7,4 @@ copy /y C:\Users\admin\Documents\GitHub\Torki\normalized_torcs\target\TorcsClien
 copy /y C:\Users\admin\Documents\GitHub\Torki\genetorcs\target\TorcsClientFcl-1.0-jar-with-dependencies.jar C:\Users\admin\Documents\GitHub\Torki\min-torcs\genetorcs.jar
 copy /y C:\Users\admin\Documents\GitHub\Torki\keypadTorcs\target\TorcsClientFcl-1.0-jar-with-dependencies.jar C:\Users\admin\Documents\GitHub\Torki\min-torcs\TorcsClientKeyboard.jar
 copy /y C:\Users\admin\Documents\GitHub\Torki\genetic_optimization_final\target\TorcsClientFcl-1.0-jar-with-dependencies.jar C:\Users\admin\Documents\GitHub\Torki\min-torcs\FuriaGenetic.jar
+copy /y C:\Users\admin\Documents\GitHub\Torki\race_driver\target\TorcsClientFcl-1.0-jar-with-dependencies.jar C:\Users\admin\Documents\GitHub\Torki\min-torcs\furiaRace.jar

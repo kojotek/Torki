@@ -59,7 +59,7 @@ public class Client {
     private static String racingLineFile;
     private static Double trackLength;
     private static boolean visual;
-    
+     
     public static void main(String[] args) throws InvalidConfigurationException, ParserConfigurationException, ImproperXMLException, UnsupportedRepresentationException, GeneCreationException, SAXException, IOException {
         
         parseParameters(args);
@@ -98,6 +98,7 @@ public class Client {
         
         GearPreference gPref = new GearPreference();
         try {
+            System.err.println("Gear preference file: " + gearsFile);
             gPref.Load(gearsFile);
             driver.setGearsPreferences(gPref);
         } catch (IOException ex) {
@@ -204,7 +205,7 @@ public class Client {
         racingLineFile = "";
         
         
-        for (int i = 3; i < args.length; i++) {
+        for (int i = 1; i < args.length; i++) {
             StringTokenizer st = new StringTokenizer(args[i], ":");
             String entity = st.nextToken();
             String value = st.nextToken();
