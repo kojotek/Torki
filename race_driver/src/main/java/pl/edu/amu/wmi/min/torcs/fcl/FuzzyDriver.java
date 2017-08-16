@@ -7,8 +7,10 @@ import java.awt.geom.Point2D;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Set;
 import net.sourceforge.jFuzzyLogic.FIS;
+import net.sourceforge.jFuzzyLogic.rule.Rule;
 
 public class FuzzyDriver extends Controller {
     
@@ -564,7 +566,17 @@ public class FuzzyDriver extends Controller {
                 
                 toReturn.restartRace = true;
             }
-
+/*
+            List<Rule> allrules = steeringFis.getFunctionBlock(null).getFuzzyRuleBlock(null).getRules();
+            
+            for (Iterator<Rule> iterator = allrules.iterator(); iterator.hasNext();) {
+                Rule next = iterator.next();
+                System.out.print("" + doubleFormatter.format(next.getDegreeOfSupport()) + ",");
+            }
+            System.out.println("");
+*/          
+            //System.out.println("" + doubleFormatter.format(sensors.getDistanceFromStartLine()) + "," + doubleFormatter.format(actualDistanceFromRacingLine) + ";");
+            
             return toReturn;
 
            
